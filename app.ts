@@ -1,11 +1,11 @@
 import * as express from "express";
+import { connect } from "mongoose";
+import { execute, subscribe } from "graphql";
+import { ApolloServer } from "apollo-server-express";
+import { createServer } from "http";
+import { SubscriptionServer } from "subscriptions-transport-ws";
 import graphqlSchema from "./graphql/schema";
 import resolvers from "./graphql/resolvers";
-import { graphqlHTTP } from "express-graphql";
-import * as cors from "cors";
-import { connect } from "mongoose";
-import { createServer } from "http";
-import { Server, Socket } from "socket.io";
 
 connect("mongodb://localhost/la-mer-noire", {
   useNewUrlParser: true,
@@ -14,27 +14,26 @@ connect("mongodb://localhost/la-mer-noire", {
 });
 
 const app = express();
-app.use(cors());
-app.use(
-  "/graphql",
-  graphqlHTTP({
-    schema: graphqlSchema,
-    rootValue: resolvers,
-    graphiql: true,
-  }),
-);
-
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: "*",
-  },
+const apolloServer = new ApolloServer({
+  schema: graphqlSchema,
+  rootValue: resolvers,
 });
+apolloServer.applyMiddleware({ app });
 
-io.on("connection", (socket: Socket) => {
-  console.log(socket.id);
-});
+const server = createServer(app);
 
-httpServer.listen(process.env.PORT || 4000, () => {
+server.listen(process.env.PORT || 4000, () => {
   console.log("Server has started.");
+  const serverf = new SubscriptionServer(
+    {
+      execute,
+      subscribe,
+      schema: graphqlSchema,
+      rootValue: resolvers,
+    },
+    {
+      server: server,
+      path: "/subscriptions",
+    },
+  );
 });

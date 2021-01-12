@@ -1,3 +1,4 @@
 import gameResolvers from "./Game";
+import playerResolvers from "./Player";
 
-export default { ...gameResolvers };
+export default { ...gameResolvers, ...playerResolvers };
