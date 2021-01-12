@@ -6,6 +6,7 @@ const gameSchema = new Schema(
       type: String,
       required: true,
     },
+    players: [{ type: Schema.Types.ObjectId, ref: "Player", default: [] }],
   },
   { timestamps: true },
 );

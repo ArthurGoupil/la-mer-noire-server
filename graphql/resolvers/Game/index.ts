@@ -1,3 +1,4 @@
+import { PubSub } from "graphql-subscriptions";
 import Game from "../../../models/Game";
 
 interface Name {
@@ -7,7 +8,15 @@ interface Id {
   id: string;
 }
 
+const pubsub = new PubSub();
+const GAME_CREATED = "GAME_CREATED";
+
 const resolvers = {
+  Subscription: {
+    gameCreated() {
+      return pubsub.asyncIterator([GAME_CREATED]);
+    },
+  },
   Query: {
     async getGames() {
       try {
@@ -25,12 +34,13 @@ const resolvers = {
     },
   },
   Mutation: {
-    async addGame({ name }: Name) {
+    async createGame({ name }: Name) {
       try {
         const game = new Game({
           name,
         });
         const newGame = await game.save();
+        pubsub.publish(GAME_CREATED, { gameCreated: newGame });
         return newGame;
       } catch (error) {
         throw error;
@@ -46,4 +56,8 @@ const resolvers = {
   },
 };
 
-export default { ...resolvers.Query, ...resolvers.Mutation };
+export default {
+  ...resolvers.Subscription,
+  ...resolvers.Query,
+  ...resolvers.Mutation,
+};
