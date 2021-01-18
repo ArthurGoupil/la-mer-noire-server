@@ -1,40 +1,39 @@
-import { buildSchema } from "graphql";
+import { gql } from "apollo-server-express";
+import {
+  gameTypes,
+  gameInputs,
+  gameSubscriptions,
+  gameQueries,
+  gameMutations,
+} from "./Game";
+import { playerTypes, playerQueries, playerMutations } from "./Player";
+import { quizTypes, quizInputs, quizQueries, quizMutations } from "./Quiz";
+import { categoryTypes, categoryQueries, categoryMutations } from "./Category";
 
-export default buildSchema(`
-  type Game {
-    _id: ID!
-    name: String!
-    players: [ID]
-    createdAt: String!
-  }
-
-  type Player {
-    _id: ID!
-    name: String!
-    createdAt: String!
-  }
+export default gql`
+  ${gameTypes}
+  ${playerTypes}
+  ${quizTypes}
+  ${categoryTypes}
+  
+  ${quizInputs}
+  ${gameInputs}
 
   type Subscription {
-    gameCreated: Game
+    ${gameSubscriptions}
   }
 
   type Query {
-    getGames:[Game!]
-    getGame:Game!
-    getPlayers:[Player!]
-    getPlayer:Player!
+    ${gameQueries}
+    ${playerQueries}
+    ${quizQueries}
+    ${categoryQueries}
   }
 
   type Mutation {
-    createGame(name:String): Game
-    deleteGame(id:ID): Game
-    createPlayer(name:String): Player
-    deletePlayer(id:ID): Player
+    ${gameMutations}
+    ${playerMutations}
+    ${quizMutations}
+    ${categoryMutations}
   }
-
-  schema {
-    subscription: Subscription
-    query: Query
-    mutation: Mutation
-  }
-`);
+`;

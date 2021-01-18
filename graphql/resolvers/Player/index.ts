@@ -9,14 +9,14 @@ interface Id {
 
 const resolvers = {
   Query: {
-    async getPlayers() {
+    getPlayers: async () => {
       try {
         return await Player.find();
       } catch (error) {
         throw error;
       }
     },
-    async getPlayer({ id }: Id) {
+    getPlayer: async (root, { id }: Id) => {
       try {
         return Player.findById(id);
       } catch (error) {
@@ -25,7 +25,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    async createPlayer({ name }: Name) {
+    createPlayer: async (root, { name }: Name) => {
       try {
         const player = new Player({
           name,
@@ -36,7 +36,7 @@ const resolvers = {
         throw error;
       }
     },
-    async deletePlayer({ id }: Id) {
+    deletePlayer: async (root, { id }: Id) => {
       try {
         return await Player.findOneAndDelete({ _id: id });
       } catch (error) {
@@ -46,4 +46,4 @@ const resolvers = {
   },
 };
 
-export default { ...resolvers.Query, ...resolvers.Mutation };
+export const { Query, Mutation } = resolvers;
