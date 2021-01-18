@@ -1,4 +1,6 @@
-import { PubSub } from "graphql-subscriptions";
+import { PubSub, withFilter } from "graphql-subscriptions";
+
+import * as cryptoRandomString from "crypto-random-string";
 import Game from "../../../models/Game";
 
 interface Name {
@@ -7,25 +9,43 @@ interface Name {
 interface Id {
   id: string;
 }
+interface CurrentStateAndId {
+  currentState: {
+    type: string;
+    _id?: string;
+  };
+  gameId: string;
+}
 
 const pubsub = new PubSub();
 const GAME_CREATED = "GAME_CREATED";
+const GAME_CURRENT_STATE_CHANGED = "GAME_CURRENT_STATE_CHANGED";
 
 const resolvers = {
   Subscription: {
-    gameCreated() {
-      return pubsub.asyncIterator([GAME_CREATED]);
+    gameCreated: {
+      subscribe: () => pubsub.asyncIterator([GAME_CREATED]),
     },
+    gameCurrentStateChanged: withFilter(
+      () => pubsub.asyncIterator([GAME_CURRENT_STATE_CHANGED]),
+      (payload, variables) => {
+        console.log(variables);
+        // console.log(context.fieldNodes[0].arguments);
+
+        return true;
+      },
+    ),
   },
+
   Query: {
-    async getGames() {
+    getGames: async () => {
       try {
         return await Game.find();
       } catch (error) {
         throw error;
       }
     },
-    async getGame({ id }: Id) {
+    getGame: async (root, { id }: Id) => {
       try {
         return Game.findById(id);
       } catch (error) {
@@ -33,11 +53,14 @@ const resolvers = {
       }
     },
   },
+
   Mutation: {
-    async createGame({ name }: Name) {
+    createGame: async (root, { name }: Name) => {
       try {
+        const shortId = cryptoRandomString({ length: 5 }).toUpperCase();
         const game = new Game({
           name,
+          shortId,
         });
         const newGame = await game.save();
         pubsub.publish(GAME_CREATED, { gameCreated: newGame });
@@ -46,7 +69,26 @@ const resolvers = {
         throw error;
       }
     },
-    async deleteGame({ id }: Id) {
+    updateGameCurrentState: async (
+      root,
+      { currentState, gameId }: CurrentStateAndId,
+    ) => {
+      try {
+        const updatedGame = await Game.findOneAndUpdate(
+          { _id: gameId },
+          { $set: { currentState } },
+          { new: true, useFindAndModify: false },
+        );
+        pubsub.publish(GAME_CURRENT_STATE_CHANGED, {
+          gameCurrentStateChanged: updatedGame,
+        });
+
+        return updatedGame;
+      } catch (error) {
+        throw error;
+      }
+    },
+    deleteGame: async (root, { id }: Id) => {
       try {
         return await Game.findOneAndDelete({ _id: id });
       } catch (error) {
@@ -56,8 +98,4 @@ const resolvers = {
   },
 };
 
-export default {
-  ...resolvers.Subscription,
-  ...resolvers.Query,
-  ...resolvers.Mutation,
-};
+export const { Subscription, Query, Mutation } = resolvers;
