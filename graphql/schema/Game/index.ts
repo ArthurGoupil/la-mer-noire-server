@@ -7,7 +7,7 @@ export const gameTypes = `
     _id: ID!
     shortId: String!
     name: String!
-    players: [ID]!
+    players: [Player]!
     currentState: CurrentState!
     createdAt: String!
   }
@@ -23,6 +23,7 @@ export const gameInputs = `
 export const gameSubscriptions = `
   gameCreated: Game!
   gameCurrentStateChanged(gameId:ID): Game!
+  gamePlayersChanged(gameId:ID): Game!
 `;
 
 export const gameQueries = `
@@ -32,6 +33,7 @@ export const gameQueries = `
 
 export const gameMutations = `
   createGame(name:String): Game!
-  updateGameCurrentState(currentState:CurrentStateInput!, gameId:ID): Game!
+  updateGameCurrentState(currentState:CurrentStateInput!, gameId:ID!): Game!
+  addPlayerToGame(playerId:ID!, gameId:ID!): Game!
   deleteGame(id:ID): Game!
 `;
