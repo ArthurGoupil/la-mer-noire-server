@@ -8,7 +8,7 @@ export const playerTypes = `
 
 export const playerQueries = `
   getPlayers: [Player!]
-  getPlayer(id:ID): Player!
+  getPlayer(id:ID!): Player!
 `;
 
 export const playerMutations = `
