@@ -6,15 +6,19 @@ import Game from "../../../models/Game";
 interface Name {
   name: string;
 }
-interface Id {
-  id: string;
+interface ShortId {
+  shortId: string;
 }
-interface CurrentStateAndId {
+
+interface PlayerId {
+  playerId: string;
+}
+
+interface CurrentState {
   currentState: {
     type: string;
     _id?: string;
   };
-  gameId: string;
 }
 
 const pubsub = new PubSub();
@@ -31,14 +35,14 @@ const resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator([GAME_CURRENT_STATE_CHANGED]),
         (payload, variables) =>
-          payload.gameCurrentStateChanged._id.toString() === variables.gameId,
+          payload.gameCurrentStateChanged.shortId === variables.shortId,
       ),
     },
     gamePlayersChanged: {
       subscribe: withFilter(
         () => pubsub.asyncIterator([GAME_PLAYERS_CHANGED]),
         (payload, variables) =>
-          payload.gamePlayersChanged._id.toString() === variables.gameId,
+          payload.gamePlayersChanged.shortId === variables.shortId,
       ),
     },
   },
@@ -51,9 +55,9 @@ const resolvers = {
         throw error;
       }
     },
-    getGame: async (root, { id }: Id) => {
+    getGame: async (root, { shortId }: ShortId) => {
       try {
-        return Game.findById(id).populate("players");
+        return Game.findOne({ shortId }).populate("players");
       } catch (error) {
         throw error;
       }
@@ -77,11 +81,11 @@ const resolvers = {
     },
     updateGameCurrentState: async (
       root,
-      { currentState, gameId }: CurrentStateAndId,
+      { currentState, shortId }: CurrentState & ShortId,
     ) => {
       try {
         const updatedGame = await Game.findOneAndUpdate(
-          { _id: gameId },
+          { shortId },
           { $set: { currentState } },
           { new: true, useFindAndModify: false },
         ).populate("players");
@@ -94,10 +98,13 @@ const resolvers = {
         throw error;
       }
     },
-    addPlayerToGame: async (root, { playerId, gameId }) => {
+    addPlayerToGame: async (
+      root,
+      { playerId, shortId }: PlayerId & ShortId,
+    ) => {
       try {
         const updatedGame = await Game.findOneAndUpdate(
-          { _id: gameId },
+          { shortId },
           { $addToSet: { players: playerId } },
           { new: true, useFindAndModify: false },
         ).populate("players");
@@ -110,9 +117,9 @@ const resolvers = {
         throw error;
       }
     },
-    deleteGame: async (root, { id }: Id) => {
+    deleteGame: async (root, { shortId }: ShortId) => {
       try {
-        return await Game.findOneAndDelete({ _id: id });
+        return await Game.findOneAndDelete({ shortId });
       } catch (error) {
         throw error;
       }

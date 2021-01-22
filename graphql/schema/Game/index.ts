@@ -22,18 +22,18 @@ export const gameInputs = `
 
 export const gameSubscriptions = `
   gameCreated: Game!
-  gameCurrentStateChanged(gameId:ID): Game!
-  gamePlayersChanged(gameId:ID): Game!
+  gameCurrentStateChanged(shortId:String!): Game!
+  gamePlayersChanged(shortId:String!): Game!
 `;
 
 export const gameQueries = `
   getGames: [Game!]
-  getGame(id:ID): Game!
+  getGame(shortId:String!): Game!
 `;
 
 export const gameMutations = `
-  createGame(name:String): Game!
-  updateGameCurrentState(currentState:CurrentStateInput!, gameId:ID!): Game!
-  addPlayerToGame(playerId:ID!, gameId:ID!): Game!
-  deleteGame(id:ID): Game!
+  createGame(name:String!): Game!
+  updateGameCurrentState(currentState:CurrentStateInput!, shortId:String!): Game!
+  addPlayerToGame(playerId:ID!, shortId:String!): Game!
+  deleteGame(shortId:String!): Game!
 `;
