@@ -4,7 +4,7 @@ import Quiz from "../models/Quiz";
 import Category from "../models/Category";
 import { connect } from "mongoose";
 
-connect("mongodb://localhost/la-mer-noire", {
+connect(process.env.MONGO_DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
