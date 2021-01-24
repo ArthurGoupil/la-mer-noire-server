@@ -19,8 +19,20 @@ const gameSchema = new Schema(
       },
     ],
     currentState: {
-      type: { type: String, default: "playersRegistration", required: true },
-      _id: { type: String },
+      stage: { type: String, default: "playersRegistration", required: true },
+      question: {
+        quiz: { type: Schema.Types.ObjectId, ref: "Quiz" },
+        level: { type: String },
+        itemId: { type: Number },
+      },
+      playersTurn: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "Player",
+          default: [],
+          required: true,
+        },
+      ],
     },
   },
   { timestamps: true },

@@ -1,7 +1,13 @@
 export const gameTypes = `
+  type Question {
+    quiz: Quiz
+    level: String
+    itemId: Int
+  }
   type CurrentState {
-    type: String!
-    _id: ID
+    stage: String!
+    question: Question
+    playersTurn: [Player]!
   }
   type Game {
     _id: ID!
@@ -13,10 +19,16 @@ export const gameTypes = `
   }
 `;
 
-export const gameInputs = `
-  input CurrentStateInput {
-    type: String!
-    _id: ID
+export const gameInputs = `  
+input QuestionInput {
+  quiz: ID!
+  level: String!
+  itemId: Int!
+}
+input CurrentStateInput {
+    stage: String!
+    question: QuestionInput
+    playersTurn: [ID]
   }
 `;
 

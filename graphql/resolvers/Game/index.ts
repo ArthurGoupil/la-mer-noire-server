@@ -16,8 +16,13 @@ interface PlayerId {
 
 interface CurrentState {
   currentState: {
-    type: string;
-    _id?: string;
+    stage: string;
+    question: {
+      quiz: string;
+      level: string;
+      itemId: number;
+    };
+    playersTurn: string[];
   };
 }
 
@@ -50,14 +55,21 @@ const resolvers = {
   Query: {
     getGames: async () => {
       try {
-        return await Game.find().populate("players");
+        return await Game.find();
       } catch (error) {
         throw error;
       }
     },
     getGame: async (root, { shortId }: ShortId) => {
       try {
-        return Game.findOne({ shortId }).populate("players");
+        return Game.findOne({ shortId }).populate([
+          "players",
+          {
+            path: "currentState.question.quiz",
+            populate: { path: "category" },
+          },
+          "currentState.playersTurn",
+        ]);
       } catch (error) {
         throw error;
       }
@@ -71,7 +83,7 @@ const resolvers = {
         const game = new Game({
           name,
           shortId,
-        }).populate("players");
+        });
         const newGame = await game.save();
         pubsub.publish(GAME_CREATED, { gameCreated: newGame });
         return newGame;
