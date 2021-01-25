@@ -100,7 +100,14 @@ const resolvers = {
           { shortId },
           { $set: { currentState } },
           { new: true, useFindAndModify: false },
-        ).populate("players");
+        ).populate([
+          "players",
+          {
+            path: "currentState.question.quiz",
+            populate: { path: "category" },
+          },
+          "currentState.playersTurn",
+        ]);
         pubsub.publish(GAME_CURRENT_STATE_CHANGED, {
           gameCurrentStateChanged: updatedGame,
         });
