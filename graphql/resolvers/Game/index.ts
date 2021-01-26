@@ -2,6 +2,7 @@ import { PubSub, withFilter } from "graphql-subscriptions";
 
 import * as cryptoRandomString from "crypto-random-string";
 import Game from "../../../models/Game";
+import { ESubscriptions } from "../../Constants/Subscriptions.constants";
 
 interface Name {
   name: string;
@@ -26,28 +27,36 @@ interface CurrentState {
   };
 }
 
+interface Answer {
+  answer: string;
+}
+
 const pubsub = new PubSub();
-const GAME_CREATED = "GAME_CREATED";
-const GAME_CURRENT_STATE_CHANGED = "GAME_CURRENT_STATE_CHANGED";
-const GAME_PLAYERS_CHANGED = "GAME_PLAYERS_CHANGED";
 
 const resolvers = {
   Subscription: {
     gameCreated: {
-      subscribe: () => pubsub.asyncIterator([GAME_CREATED]),
+      subscribe: () => pubsub.asyncIterator([ESubscriptions.GAME_CREATED]),
     },
     gameCurrentStateChanged: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator([GAME_CURRENT_STATE_CHANGED]),
+        () => pubsub.asyncIterator([ESubscriptions.GAME_CURRENT_STATE_CHANGED]),
         (payload, variables) =>
           payload.gameCurrentStateChanged.shortId === variables.shortId,
       ),
     },
     gamePlayersChanged: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator([GAME_PLAYERS_CHANGED]),
+        () => pubsub.asyncIterator([ESubscriptions.GAME_PLAYERS_CHANGED]),
         (payload, variables) =>
           payload.gamePlayersChanged.shortId === variables.shortId,
+      ),
+    },
+    playerAnswered: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator([ESubscriptions.PLAYER_ANSWERED]),
+        (payload, variables) =>
+          payload.playerAnswered.shortId === variables.shortId,
       ),
     },
   },
@@ -85,7 +94,7 @@ const resolvers = {
           shortId,
         });
         const newGame = await game.save();
-        pubsub.publish(GAME_CREATED, { gameCreated: newGame });
+        pubsub.publish(ESubscriptions.GAME_CREATED, { gameCreated: newGame });
         return newGame;
       } catch (error) {
         throw error;
@@ -108,7 +117,7 @@ const resolvers = {
           },
           "currentState.playersTurn",
         ]);
-        pubsub.publish(GAME_CURRENT_STATE_CHANGED, {
+        pubsub.publish(ESubscriptions.GAME_CURRENT_STATE_CHANGED, {
           gameCurrentStateChanged: updatedGame,
         });
 
@@ -127,7 +136,7 @@ const resolvers = {
           { $addToSet: { players: playerId } },
           { new: true, useFindAndModify: false },
         ).populate("players");
-        pubsub.publish(GAME_PLAYERS_CHANGED, {
+        pubsub.publish(ESubscriptions.GAME_PLAYERS_CHANGED, {
           gamePlayersChanged: updatedGame,
         });
 
@@ -142,6 +151,17 @@ const resolvers = {
       } catch (error) {
         throw error;
       }
+    },
+    giveAnswer: async (
+      root,
+      { shortId, playerId, answer }: ShortId & PlayerId & Answer,
+    ) => {
+      const AnswerResponse = { playerId, answer };
+      pubsub.publish(ESubscriptions.PLAYER_ANSWERED, {
+        playerAnswered: { ...AnswerResponse, shortId },
+      });
+
+      return AnswerResponse;
     },
   },
 };

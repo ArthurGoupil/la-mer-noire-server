@@ -17,6 +17,10 @@ export const gameTypes = `
     currentState: CurrentState!
     createdAt: String!
   }
+  type AnswerResponse {
+    playerId: ID!
+    answer: String!
+  }
 `;
 
 export const gameInputs = `  
@@ -36,6 +40,7 @@ export const gameSubscriptions = `
   gameCreated: Game!
   gameCurrentStateChanged(shortId:String!): Game!
   gamePlayersChanged(shortId:String!): Game!
+  playerAnswered(shortId:String!): AnswerResponse!
 `;
 
 export const gameQueries = `
@@ -48,4 +53,5 @@ export const gameMutations = `
   updateGameCurrentState(currentState:CurrentStateInput!, shortId:String!): Game!
   addPlayerToGame(playerId:ID!, shortId:String!): Game!
   deleteGame(shortId:String!): Game!
+  giveAnswer(shortId:String!, playerId:ID!, answer: String!): AnswerResponse!
 `;
