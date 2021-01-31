@@ -77,14 +77,14 @@ connect(process.env.MONGO_DB_URL, {
               anecdote: quizItem.anecdote,
             })),
             intermediate: quiz.quizz.fr["confirmé"].map((quizItem) => ({
-              _id: quizItem.id,
+              _id: quizItem.id - 10,
               question: quizItem.question,
               choices: quizItem.propositions,
               answer: quizItem["réponse"],
               anecdote: quizItem.anecdote,
             })),
             expert: quiz.quizz.fr["expert"].map((quizItem) => ({
-              _id: quizItem.id,
+              _id: quizItem.id - 20,
               question: quizItem.question,
               choices: quizItem.propositions,
               answer: quizItem["réponse"],

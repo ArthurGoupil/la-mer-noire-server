@@ -29,40 +29,29 @@ interface QuizInput {
 
 const resolvers = {
   Query: {
-    getQuizes: async () => {
+    quizes: async () => {
       try {
         return await Quiz.find().populate("category");
       } catch (error) {
         throw error;
       }
     },
-    getQuiz: async (root, { id }: Id) => {
+    quiz: async (root, { id }: Id) => {
       try {
         return await Quiz.findById(id).populate("category");
       } catch (error) {
         throw error;
       }
     },
-    getRandomQuiz: async () => {
+    randomQuizId: async () => {
       try {
         return (
           await Quiz.aggregate([
             {
               $sample: { size: 1 },
             },
-            {
-              $lookup: {
-                from: "categories",
-                localField: "category",
-                foreignField: "_id",
-                as: "category",
-              },
-            },
-            {
-              $unwind: "$category",
-            },
           ])
-        )[0];
+        )[0]._id;
       } catch (error) {
         throw error;
       }

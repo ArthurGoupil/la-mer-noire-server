@@ -44,9 +44,9 @@ export const quizInputs = `
 `;
 
 export const quizQueries = `
-  getQuizes: [Quiz!]
-  getQuiz(id:ID!): Quiz!
-  getRandomQuiz: Quiz!
+  quizes: [Quiz!]
+  quiz(id:ID!): Quiz!
+  randomQuizId: ID!
 `;
 
 export const quizMutations = `
