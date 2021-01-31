@@ -15,41 +15,50 @@ interface PlayerId {
   playerId: string;
 }
 
-interface CurrentState {
-  currentState: {
-    stage: string;
-    question: {
-      quiz: string;
-      level: string;
-      itemId: number;
-    };
-    playersTurn: string[];
-  };
+interface Stage {
+  stage: string;
 }
 
 interface Answer {
   answer: string;
 }
 
+interface CurrentQuizItem {
+  currentQuizItem: {
+    quizId: string;
+    level: "beginner" | "intermediate" | "expert";
+    quizItemId: number;
+  };
+}
+
 const pubsub = new PubSub();
 
 const resolvers = {
   Subscription: {
-    gameCreated: {
-      subscribe: () => pubsub.asyncIterator([ESubscriptions.GAME_CREATED]),
-    },
-    gameCurrentStateChanged: {
+    gamePlayersUpdated: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator([ESubscriptions.GAME_CURRENT_STATE_CHANGED]),
+        () => pubsub.asyncIterator([ESubscriptions.GAME_PLAYERS_UPDATED]),
         (payload, variables) =>
-          payload.gameCurrentStateChanged.shortId === variables.shortId,
+          payload.gamePlayersUpdated.shortId === variables.shortId,
       ),
     },
-    gamePlayersChanged: {
+    gameStageUpdated: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator([ESubscriptions.GAME_PLAYERS_CHANGED]),
-        (payload, variables) =>
-          payload.gamePlayersChanged.shortId === variables.shortId,
+        () => pubsub.asyncIterator([ESubscriptions.GAME_STAGE_UPDATED]),
+        (payload, variables) => {
+          return payload.gameStageUpdated.shortId === variables.shortId;
+        },
+      ),
+    },
+    gameCurrentQuizItemUpdated: {
+      subscribe: withFilter(
+        () =>
+          pubsub.asyncIterator([ESubscriptions.GAME_CURRENT_QUIZ_ITEM_UPDATED]),
+        (payload, variables) => {
+          return (
+            payload.gameCurrentQuizItemUpdated.shortId === variables.shortId
+          );
+        },
       ),
     },
     playerAnswered: {
@@ -62,14 +71,7 @@ const resolvers = {
   },
 
   Query: {
-    getGames: async () => {
-      try {
-        return await Game.find();
-      } catch (error) {
-        throw error;
-      }
-    },
-    getGame: async (root, { shortId }: ShortId) => {
+    game: async (root, { shortId }: ShortId) => {
       try {
         return Game.findOne({ shortId }).populate([
           "players",
@@ -77,7 +79,7 @@ const resolvers = {
             path: "currentState.question.quiz",
             populate: { path: "category" },
           },
-          "currentState.playersTurn",
+          "currentState.currentPlayers",
         ]);
       } catch (error) {
         throw error;
@@ -90,8 +92,8 @@ const resolvers = {
       try {
         const shortId = cryptoRandomString({ length: 5 }).toUpperCase();
         const game = new Game({
-          name,
           shortId,
+          name,
         });
         const newGame = await game.save();
         pubsub.publish(ESubscriptions.GAME_CREATED, { gameCreated: newGame });
@@ -100,35 +102,18 @@ const resolvers = {
         throw error;
       }
     },
-    updateGameCurrentState: async (
-      root,
-      { currentState, shortId }: CurrentState & ShortId,
-    ) => {
+    deleteGame: async (root, { shortId }: ShortId) => {
       try {
-        const updatedGame = await Game.findOneAndUpdate(
-          { shortId },
-          { $set: { currentState } },
-          { new: true, useFindAndModify: false },
-        ).populate([
-          "players",
-          {
-            path: "currentState.question.quiz",
-            populate: { path: "category" },
-          },
-          "currentState.playersTurn",
-        ]);
-        pubsub.publish(ESubscriptions.GAME_CURRENT_STATE_CHANGED, {
-          gameCurrentStateChanged: updatedGame,
-        });
+        await Game.findOneAndDelete({ shortId });
 
-        return updatedGame;
+        return `Game ${shortId} deleted.`;
       } catch (error) {
         throw error;
       }
     },
     addPlayerToGame: async (
       root,
-      { playerId, shortId }: PlayerId & ShortId,
+      { shortId, playerId }: ShortId & PlayerId,
     ) => {
       try {
         const updatedGame = await Game.findOneAndUpdate(
@@ -136,32 +121,41 @@ const resolvers = {
           { $addToSet: { players: playerId } },
           { new: true, useFindAndModify: false },
         ).populate("players");
-        pubsub.publish(ESubscriptions.GAME_PLAYERS_CHANGED, {
-          gamePlayersChanged: updatedGame,
+        pubsub.publish(ESubscriptions.GAME_PLAYERS_UPDATED, {
+          gamePlayersUpdated: updatedGame,
         });
 
-        return updatedGame;
+        return `Player added to ${shortId}`;
       } catch (error) {
         throw error;
       }
     },
-    deleteGame: async (root, { shortId }: ShortId) => {
-      try {
-        return await Game.findOneAndDelete({ shortId });
-      } catch (error) {
-        throw error;
-      }
+    updateGameStage: async (root, { shortId, stage }: ShortId & Stage) => {
+      pubsub.publish(ESubscriptions.GAME_STAGE_UPDATED, {
+        gameStageUpdated: { shortId, stage },
+      });
+
+      return `Stage of ${shortId} updated.`;
+    },
+    updateGameCurrentQuizItem: async (
+      root,
+      { shortId, currentQuizItem }: ShortId & CurrentQuizItem,
+    ) => {
+      pubsub.publish(ESubscriptions.GAME_CURRENT_QUIZ_ITEM_UPDATED, {
+        gameCurrentQuizItemUpdated: { shortId, ...currentQuizItem },
+      });
+
+      return `CurrentQuizItem of ${shortId} updated.`;
     },
     giveAnswer: async (
       root,
       { shortId, playerId, answer }: ShortId & PlayerId & Answer,
     ) => {
-      const AnswerResponse = { playerId, answer };
       pubsub.publish(ESubscriptions.PLAYER_ANSWERED, {
-        playerAnswered: { ...AnswerResponse, shortId },
+        playerAnswered: { shortId, playerId, answer },
       });
 
-      return AnswerResponse;
+      return `Answer given from ${shortId} by ${playerId}.`;
     },
   },
 };

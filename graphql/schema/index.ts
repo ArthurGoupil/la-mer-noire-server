@@ -16,8 +16,8 @@ export default gql`
   ${quizTypes}
   ${categoryTypes}
   
-  ${quizInputs}
   ${gameInputs}
+  ${quizInputs}
 
   type Subscription {
     ${gameSubscriptions}
