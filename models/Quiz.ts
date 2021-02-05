@@ -10,7 +10,7 @@ const quizSchema = new Schema(
       beginner: {
         type: [
           {
-            _id: { type: Number, required: true },
+            quizItemId: { type: Number, required: true },
             question: { type: String, required: true },
             choices: { type: [String], required: true },
             answer: { type: String, required: true },
@@ -22,7 +22,7 @@ const quizSchema = new Schema(
       intermediate: {
         type: [
           {
-            _id: { type: Number, required: true },
+            quizItemId: { type: Number, required: true },
             question: { type: String, required: true },
             choices: { type: [String], required: true },
             answer: { type: String, required: true },
@@ -34,7 +34,7 @@ const quizSchema = new Schema(
       expert: {
         type: [
           {
-            _id: { type: Number, required: true },
+            quizItemId: { type: Number, required: true },
             question: { type: String, required: true },
             choices: { type: [String], required: true },
             answer: { type: String, required: true },

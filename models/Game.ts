@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { EGameStage } from "../graphql/constants/GameStage.constants";
 
 const gameSchema = new Schema(
   {
@@ -10,6 +11,12 @@ const gameSchema = new Schema(
       type: String,
       required: true,
     },
+    stage: {
+      type: String,
+      enum: Object.values(EGameStage),
+      default: EGameStage.playersRegistration,
+      required: true,
+    },
     players: [
       {
         type: Schema.Types.ObjectId,
@@ -18,6 +25,27 @@ const gameSchema = new Schema(
         required: true,
       },
     ],
+    currentPlayers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Player",
+        default: [],
+        required: true,
+      },
+    ],
+    currentQuizItem: {
+      quizId: {
+        type: Schema.Types.ObjectId,
+        ref: "Quiz",
+      },
+      level: {
+        type: String,
+        enum: ["beginner", "intermediate", "expert"],
+      },
+      quizItemId: {
+        type: Number,
+      },
+    },
   },
   { timestamps: true },
 );

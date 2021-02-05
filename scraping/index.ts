@@ -22,6 +22,9 @@ connect(process.env.MONGO_DB_URL, {
     const parsedHtmlNodes = parse(htmlResponse.data).querySelectorAll("");
 
     const categoryRecord = {};
+
+    let numberOfLequelLaquelle = 0;
+
     let currentCategory = "";
     let firstCategoryIsParsed = false;
 
@@ -34,12 +37,12 @@ connect(process.env.MONGO_DB_URL, {
         }
         if (firstCategoryIsParsed) {
           currentCategory = category;
-          if (!categoryRecord[currentCategory]) {
-            const newCategory = new Category({ name: currentCategory });
-            await newCategory.save();
-            categoryRecord[currentCategory] = newCategory._id;
-            console.log(`Category "${currentCategory}" added to the database.`);
-          }
+          // if (!categoryRecord[currentCategory]) {
+          //   const newCategory = new Category({ name: currentCategory });
+          //   await newCategory.save();
+          //   categoryRecord[currentCategory] = newCategory._id;
+          //   console.log(`Category "${currentCategory}" added to the database.`);
+          // }
         }
       }
 
@@ -59,44 +62,57 @@ connect(process.env.MONGO_DB_URL, {
 
         const quiz = (await axios.get(JSONLink)).data;
 
-        const inputQuiz = {
-          quizNumber: 1,
-          category: categoryRecord[currentCategory],
-          theme: quiz["thème"].slice(0, quiz["thème"].indexOf("(") - 1),
-          subTheme: quiz["thème"].slice(
-            quiz["thème"].indexOf("(") + 1,
-            quiz["thème"].indexOf(")"),
-          ),
-          difficulty: quiz["difficulté"][0],
-          quizItems: {
-            beginner: quiz.quizz.fr["débutant"].map((quizItem) => ({
-              _id: quizItem.id,
-              question: quizItem.question,
-              choices: quizItem.propositions,
-              answer: quizItem["réponse"],
-              anecdote: quizItem.anecdote,
-            })),
-            intermediate: quiz.quizz.fr["confirmé"].map((quizItem) => ({
-              _id: quizItem.id - 10,
-              question: quizItem.question,
-              choices: quizItem.propositions,
-              answer: quizItem["réponse"],
-              anecdote: quizItem.anecdote,
-            })),
-            expert: quiz.quizz.fr["expert"].map((quizItem) => ({
-              _id: quizItem.id - 20,
-              question: quizItem.question,
-              choices: quizItem.propositions,
-              answer: quizItem["réponse"],
-              anecdote: quizItem.anecdote,
-            })),
-          },
-        };
+        quiz.quizz.fr["débutant"].forEach((quiz) => {
+          if (
+            quiz.question.includes("Lequel") ||
+            quiz.question.includes("Laquelle") ||
+            quiz.question.includes("Lesquels") ||
+            quiz.question.includes("Lesquelles")
+          ) {
+            numberOfLequelLaquelle++;
+          }
+        });
 
-        const newQuiz = new Quiz(inputQuiz);
-        await newQuiz.save();
+        // const inputQuiz = {
+        //   quizNumber: 1,
+        //   category: categoryRecord[currentCategory],
+        //   theme: quiz["thème"].slice(0, quiz["thème"].indexOf("(") - 1),
+        //   subTheme: quiz["thème"].slice(
+        //     quiz["thème"].indexOf("(") + 1,
+        //     quiz["thème"].indexOf(")"),
+        //   ),
+        //   difficulty: quiz["difficulté"][0],
+        //   quizItems: {
+        //     beginner: quiz.quizz.fr["débutant"].map((quizItem) => ({
+        //       quizItemId: quizItem.id,
+        //       question: quizItem.question,
+        //       choices: quizItem.propositions,
+        //       answer: quizItem["réponse"],
+        //       anecdote: quizItem.anecdote,
+        //     })),
+        //     intermediate: quiz.quizz.fr["confirmé"].map((quizItem) => ({
+        //       quizItemId: quizItem.id - 10,
+        //       question: quizItem.question,
+        //       choices: quizItem.propositions,
+        //       answer: quizItem["réponse"],
+        //       anecdote: quizItem.anecdote,
+        //     })),
+        //     expert: quiz.quizz.fr["expert"].map((quizItem) => ({
+        //       quizItemId: quizItem.id - 20,
+        //       question: quizItem.question,
+        //       choices: quizItem.propositions,
+        //       answer: quizItem["réponse"],
+        //       anecdote: quizItem.anecdote,
+        //     })),
+        //   },
+        // };
 
-        console.log(`Quiz "${newQuiz._id}" added to the database.`);
+        // const newQuiz = new Quiz(inputQuiz);
+        // await newQuiz.save();
+
+        console.log(numberOfLequelLaquelle);
+
+        // console.log(`Quiz "${newQuiz._id}" added to the database.`);
       }
     }
   } catch (error) {

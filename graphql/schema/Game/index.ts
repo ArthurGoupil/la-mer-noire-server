@@ -3,25 +3,28 @@ export const gameTypes = `
     _id: ID!
     shortId: String!
     name: String!
+    stage: String!
     players: [Player]!
+    currentPlayers: [Player]!
+    currentQuizItem: CurrentQuizItem
     createdAt: String!
   }
-  type AnswerResponse {
-    playerId: ID!
-    answer: String!
-  }
-  type StageResponse {
+  type Stage {
     stage: String!
   }
-  type CurrentQuizItemResponse {
-    quizId: ID!
-    level: String!
-    quizItemId: Int!
+  type CurrentQuizItem {
+    quizId: ID
+    level: String
+    quizItemId: Int
+  }
+  type Answer {
+    playerId: ID!
+    answer: String!
   }
 `;
 
 export const gameInputs = `
-  input CurrentQuizItem {
+  input CurrentQuizItemInput {
     quizId: ID!
     level: String!
     quizItemId: Int!
@@ -30,9 +33,9 @@ export const gameInputs = `
 
 export const gameSubscriptions = `
   gamePlayersUpdated(shortId:String!): Game!
-  gameStageUpdated(shortId:String!): StageResponse!
-  gameCurrentQuizItemUpdated(shortId:String!): CurrentQuizItemResponse!
-  playerAnswered(shortId:String!): AnswerResponse!
+  gameStageUpdated(shortId:String!): Game!
+  gameCurrentQuizItemUpdated(shortId:String!): Game!
+  playerAnswered(shortId:String!): Answer!
 `;
 
 export const gameQueries = `
@@ -44,6 +47,6 @@ export const gameMutations = `
   deleteGame(shortId:String!): String!
   addPlayerToGame(shortId:String!, playerId:ID!): String!
   updateGameStage(shortId:String!, stage:String!): String!
-  updateGameCurrentQuizItem(shortId:String!, currentQuizItem:CurrentQuizItem!): String!
+  updateGameCurrentQuizItem(shortId:String!, currentQuizItem:CurrentQuizItemInput!): String!
   giveAnswer(shortId:String!, playerId:ID!, answer:String!): String!
 `;

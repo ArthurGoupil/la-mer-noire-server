@@ -1,6 +1,6 @@
 export const quizTypes = `
   type QuizItem {
-    _id: Int!
+    quizItemId: Int!
     question: String!
     choices: [String]!
     answer: String!
@@ -23,7 +23,7 @@ export const quizTypes = `
 
 export const quizInputs = `
   input QuizItemInput {
-    _id: Int!
+    quizItemId: Int!
     question: String!
     choices: [String]!
     answer: String!
