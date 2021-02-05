@@ -2,7 +2,7 @@ import { PubSub, withFilter } from "graphql-subscriptions";
 
 import * as cryptoRandomString from "crypto-random-string";
 import Game from "../../../models/Game";
-import { ESubscriptions } from "../../Constants/Subscriptions.constants";
+import { ESubscriptions } from "../../constants/Subscriptions.constants";
 
 interface Name {
   name: string;
@@ -121,6 +121,7 @@ const resolvers = {
           { $addToSet: { players: playerId } },
           { new: true, useFindAndModify: false },
         ).populate("players");
+
         pubsub.publish(ESubscriptions.GAME_PLAYERS_UPDATED, {
           gamePlayersUpdated: updatedGame,
         });
@@ -131,21 +132,41 @@ const resolvers = {
       }
     },
     updateGameStage: async (root, { shortId, stage }: ShortId & Stage) => {
-      pubsub.publish(ESubscriptions.GAME_STAGE_UPDATED, {
-        gameStageUpdated: { shortId, stage },
-      });
+      try {
+        const updatedGame = await Game.findOneAndUpdate(
+          { shortId },
+          { $set: { stage } },
+          { new: true, useFindAndModify: false, runValidators: true },
+        ).populate("players");
 
-      return `Stage of ${shortId} updated.`;
+        pubsub.publish(ESubscriptions.GAME_STAGE_UPDATED, {
+          gameStageUpdated: updatedGame,
+        });
+
+        return `Stage of ${shortId} updated.`;
+      } catch (error) {
+        throw error;
+      }
     },
     updateGameCurrentQuizItem: async (
       root,
       { shortId, currentQuizItem }: ShortId & CurrentQuizItem,
     ) => {
-      pubsub.publish(ESubscriptions.GAME_CURRENT_QUIZ_ITEM_UPDATED, {
-        gameCurrentQuizItemUpdated: { shortId, ...currentQuizItem },
-      });
+      try {
+        const updatedGame = await Game.findOneAndUpdate(
+          { shortId },
+          { $set: { currentQuizItem } },
+          { new: true, useFindAndModify: false, runValidators: true },
+        ).populate("players");
 
-      return `CurrentQuizItem of ${shortId} updated.`;
+        pubsub.publish(ESubscriptions.GAME_CURRENT_QUIZ_ITEM_UPDATED, {
+          gameCurrentQuizItemUpdated: updatedGame,
+        });
+
+        return `CurrentQuizItem of ${shortId} updated.`;
+      } catch (error) {
+        throw error;
+      }
     },
     giveAnswer: async (
       root,
