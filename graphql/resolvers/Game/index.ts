@@ -2,7 +2,7 @@ import { PubSub, withFilter } from "graphql-subscriptions";
 
 import * as cryptoRandomString from "crypto-random-string";
 import Game from "../../../models/Game";
-import { ESubscriptions } from "../../constants/Subscriptions.constants";
+import { ESubscriptions } from "../../Constants/Subscriptions.constants";
 
 interface Name {
   name: string;
