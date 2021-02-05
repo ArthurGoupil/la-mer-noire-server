@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { EGameStage } from "../graphql/constants/GameStage.constants";
+import { EGameStage } from "../constants/GameStage.constants";
 
 const gameSchema = new Schema(
   {
