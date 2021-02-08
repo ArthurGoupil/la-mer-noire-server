@@ -74,12 +74,12 @@ const resolvers = {
     game: async (root, { shortId }: ShortId) => {
       try {
         return Game.findOne({ shortId }).populate([
-          "players",
+          "players.player",
           {
             path: "currentState.question.quiz",
             populate: { path: "category" },
           },
-          "currentState.currentPlayers",
+          "currentPlayers",
         ]);
       } catch (error) {
         throw error;
@@ -118,9 +118,9 @@ const resolvers = {
       try {
         const updatedGame = await Game.findOneAndUpdate(
           { shortId },
-          { $addToSet: { players: playerId } },
+          { $addToSet: { players: { player: playerId, points: 0 } } },
           { new: true, useFindAndModify: false },
-        ).populate("players");
+        ).populate("players.player");
 
         pubsub.publish(ESubscriptions.GAME_PLAYERS_UPDATED, {
           gamePlayersUpdated: updatedGame,
@@ -137,7 +137,7 @@ const resolvers = {
           { shortId },
           { $set: { stage } },
           { new: true, useFindAndModify: false, runValidators: true },
-        ).populate("players");
+        ).populate("players.player");
 
         pubsub.publish(ESubscriptions.GAME_STAGE_UPDATED, {
           gameStageUpdated: updatedGame,
@@ -157,7 +157,7 @@ const resolvers = {
           { shortId },
           { $set: { currentQuizItem } },
           { new: true, useFindAndModify: false, runValidators: true },
-        ).populate("players");
+        ).populate("players.player");
 
         pubsub.publish(ESubscriptions.GAME_CURRENT_QUIZ_ITEM_UPDATED, {
           gameCurrentQuizItemUpdated: updatedGame,

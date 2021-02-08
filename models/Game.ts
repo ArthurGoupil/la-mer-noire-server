@@ -17,34 +17,54 @@ const gameSchema = new Schema(
       default: EGameStage.playersRegistration,
       required: true,
     },
-    players: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Player",
-        default: [],
-        required: true,
-      },
-    ],
-    currentPlayers: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Player",
-        default: [],
-        required: true,
-      },
-    ],
+    players: {
+      _id: false,
+      type: [
+        {
+          player: {
+            type: Schema.Types.ObjectId,
+            ref: "Player",
+            required: true,
+          },
+          points: {
+            type: Number,
+            default: 0,
+            required: true,
+          },
+        },
+      ],
+      default: [],
+      required: true,
+    },
+    currentPlayers: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "Player",
+        },
+      ],
+      default: [],
+      required: true,
+    },
     currentQuizItem: {
-      quizId: {
-        type: Schema.Types.ObjectId,
-        ref: "Quiz",
+      type: {
+        quizId: {
+          type: Schema.Types.ObjectId,
+          ref: "Quiz",
+          required: true,
+        },
+        level: {
+          type: String,
+          enum: ["beginner", "intermediate", "expert"],
+          required: true,
+        },
+        quizItemId: {
+          type: Number,
+          required: true,
+        },
       },
-      level: {
-        type: String,
-        enum: ["beginner", "intermediate", "expert"],
-      },
-      quizItemId: {
-        type: Number,
-      },
+      required: true,
+      default: { quizId: null, level: null, quizItemId: null },
     },
   },
   { timestamps: true },

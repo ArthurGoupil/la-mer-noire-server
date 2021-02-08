@@ -4,13 +4,17 @@ export const gameTypes = `
     shortId: String!
     name: String!
     stage: String!
-    players: [Player]!
+    players: [GamePlayer]!
     currentPlayers: [Player]!
     currentQuizItem: CurrentQuizItem
     createdAt: String!
   }
   type Stage {
     stage: String!
+  }
+  type GamePlayer {
+    player: Player!
+    points: Int!
   }
   type CurrentQuizItem {
     quizId: ID
