@@ -47,24 +47,20 @@ const gameSchema = new Schema(
       required: true,
     },
     currentQuizItem: {
-      type: {
-        quizId: {
-          type: Schema.Types.ObjectId,
-          ref: "Quiz",
-          required: true,
-        },
-        level: {
-          type: String,
-          enum: ["beginner", "intermediate", "expert"],
-          required: true,
-        },
-        quizItemId: {
-          type: Number,
-          required: true,
-        },
+      quizId: {
+        type: Schema.Types.ObjectId,
+        ref: "Quiz",
       },
-      required: true,
-      default: { quizId: null, level: null, quizItemId: null },
+      level: {
+        type: String,
+        enum: ["beginner", "intermediate", "expert"],
+      },
+      quizItemId: {
+        type: String,
+      },
+      createdAtTimestamp: {
+        type: Date,
+      },
     },
   },
   { timestamps: true },

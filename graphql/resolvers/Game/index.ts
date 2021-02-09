@@ -28,6 +28,7 @@ interface CurrentQuizItem {
     quizId: string;
     level: "beginner" | "intermediate" | "expert";
     quizItemId: number;
+    createdAtTimestamp: number;
   };
 }
 
@@ -156,7 +157,7 @@ const resolvers = {
         const updatedGame = await Game.findOneAndUpdate(
           { shortId },
           { $set: { currentQuizItem } },
-          { new: true, useFindAndModify: false, runValidators: true },
+          { runValidators: true, new: true, useFindAndModify: false },
         ).populate("players.player");
 
         pubsub.publish(ESubscriptions.GAME_CURRENT_QUIZ_ITEM_UPDATED, {

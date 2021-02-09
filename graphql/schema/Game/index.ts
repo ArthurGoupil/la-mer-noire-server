@@ -16,10 +16,12 @@ export const gameTypes = `
     player: Player!
     points: Int!
   }
+  scalar Date
   type CurrentQuizItem {
     quizId: ID
     level: String
     quizItemId: Int
+    createdAtTimestamp: Int
   }
   type Answer {
     playerId: ID!
@@ -32,6 +34,7 @@ export const gameInputs = `
     quizId: ID!
     level: String!
     quizItemId: Int!
+    createdAtTimestamp: Int!
   }
 `;
 
