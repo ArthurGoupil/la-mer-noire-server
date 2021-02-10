@@ -2,7 +2,9 @@ import { PubSub, withFilter } from "graphql-subscriptions";
 
 import * as cryptoRandomString from "crypto-random-string";
 import Game from "../../../models/Game";
+import Quiz from "../../../models/Quiz";
 import { ESubscriptions } from "../../../constants/Subscriptions.constants";
+import getRandomQuizItemId from "../../../utils/getRandomQuizItemId.util";
 
 interface Name {
   name: string;
@@ -92,9 +94,22 @@ const resolvers = {
     createGame: async (root, { name }: Name) => {
       try {
         const shortId = cryptoRandomString({ length: 5 }).toUpperCase();
+        const randomQuizId = (
+          await Quiz.aggregate([
+            {
+              $sample: { size: 1 },
+            },
+          ])
+        )[0]._id;
         const game = new Game({
           shortId,
           name,
+          currentQuizItem: {
+            quizId: randomQuizId,
+            level: "beginner",
+            quizItemId: getRandomQuizItemId(),
+            createdAtTimestamp: -1,
+          },
         });
         const newGame = await game.save();
         pubsub.publish(ESubscriptions.GAME_CREATED, { gameCreated: newGame });
@@ -136,7 +151,14 @@ const resolvers = {
       try {
         const updatedGame = await Game.findOneAndUpdate(
           { shortId },
-          { $set: { stage } },
+          {
+            $set: {
+              stage,
+              "currentQuizItem.createdAtTimestamp": Math.floor(
+                Date.now() / 1000,
+              ),
+            },
+          },
           { new: true, useFindAndModify: false, runValidators: true },
         ).populate("players.player");
 

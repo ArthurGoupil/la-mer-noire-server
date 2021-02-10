@@ -19,6 +19,14 @@ export const quizTypes = `
     difficulty: Int!
     quizItems: QuizItemsByLevel!
   }
+  type QuizItemData {
+    quizId: String!
+    category: Category!
+    theme: String!
+    subTheme: String!
+    createdAtTimestamp: Int!
+    quiz: QuizItem!
+  }
 `;
 
 export const quizInputs = `
@@ -44,9 +52,7 @@ export const quizInputs = `
 `;
 
 export const quizQueries = `
-  quizes: [Quiz!]
-  quiz(id:ID!): Quiz!
-  randomQuizId: ID!
+  quizItemData(quizId:ID!, level:String!, quizItemId:Int!, createdAtTimestamp:Int!): QuizItemData!
 `;
 
 export const quizMutations = `

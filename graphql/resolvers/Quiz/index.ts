@@ -4,8 +4,8 @@ interface Id {
   id: string;
 }
 
-interface QuizItemInput {
-  _id: number;
+interface QuizItem {
+  quizItemId: number;
   question: string;
   choices: [string];
   answer: string;
@@ -20,38 +20,47 @@ interface QuizInput {
     subTheme: string;
     difficulty: number;
     quizItems: {
-      beginner: [QuizItemInput];
-      intermediate: [QuizItemInput];
-      expert: [QuizItemInput];
+      beginner: [QuizItem];
+      intermediate: [QuizItem];
+      expert: [QuizItem];
     };
   };
 }
 
+interface QuizItemDataInput {
+  quizId: string;
+  level: "beginner" | "intermediate" | "expert";
+  quizItemId: number;
+  createdAtTimestamp: number;
+}
+
+interface QuizResponse {
+  category: { _id: string; name: string };
+  theme: string;
+  subTheme: string;
+  quizItems: [QuizItem];
+}
+
 const resolvers = {
   Query: {
-    quizes: async () => {
+    quizItemData: async (
+      root,
+      { quizId, level, quizItemId, createdAtTimestamp }: QuizItemDataInput,
+    ) => {
       try {
-        return await Quiz.find().populate("category");
-      } catch (error) {
-        throw error;
-      }
-    },
-    quiz: async (root, { id }: Id) => {
-      try {
-        return await Quiz.findById(id).populate("category");
-      } catch (error) {
-        throw error;
-      }
-    },
-    randomQuizId: async () => {
-      try {
-        return (
-          await Quiz.aggregate([
-            {
-              $sample: { size: 1 },
-            },
-          ])
-        )[0]._id;
+        const quiz: unknown = await Quiz.findById(quizId).populate("category");
+        const { category, theme, subTheme, quizItems } = quiz as QuizResponse;
+
+        return {
+          quizId,
+          category,
+          theme,
+          subTheme,
+          createdAtTimestamp,
+          quiz: quizItems[level].find(
+            (quiz: QuizItem) => quiz.quizItemId === quizItemId,
+          ),
+        };
       } catch (error) {
         throw error;
       }

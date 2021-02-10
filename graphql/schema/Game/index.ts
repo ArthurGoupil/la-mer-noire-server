@@ -6,7 +6,7 @@ export const gameTypes = `
     stage: String!
     players: [GamePlayer]!
     currentPlayers: [Player]!
-    currentQuizItem: CurrentQuizItem
+    currentQuizItem: CurrentQuizItem!
     createdAt: String!
   }
   type Stage {
@@ -16,11 +16,10 @@ export const gameTypes = `
     player: Player!
     points: Int!
   }
-  scalar Date
   type CurrentQuizItem {
-    quizId: ID
-    level: String
-    quizItemId: Int
+    quizId: ID!
+    level: String!
+    quizItemId: Int!
     createdAtTimestamp: Int
   }
   type Answer {

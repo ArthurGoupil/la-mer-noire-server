@@ -28,6 +28,7 @@ export default gql`
     ${playerQueries}
     ${quizQueries}
     ${categoryQueries}
+    timestamp: Int!
   }
 
   type Mutation {
