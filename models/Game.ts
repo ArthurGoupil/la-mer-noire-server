@@ -63,7 +63,6 @@ const gameSchema = new Schema(
       },
       createdAtTimestamp: {
         type: Date,
-        required: true,
       },
     },
   },

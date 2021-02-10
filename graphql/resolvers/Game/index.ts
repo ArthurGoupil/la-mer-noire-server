@@ -108,7 +108,6 @@ const resolvers = {
             quizId: randomQuizId,
             level: "beginner",
             quizItemId: getRandomQuizItemId(),
-            createdAtTimestamp: -1,
           },
         });
         const newGame = await game.save();
