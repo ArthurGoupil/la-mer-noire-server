@@ -1,7 +1,6 @@
 import { gql } from "apollo-server-express";
 import {
   gameTypes,
-  gameInputs,
   gameSubscriptions,
   gameQueries,
   gameMutations,
@@ -16,7 +15,6 @@ export default gql`
   ${quizTypes}
   ${categoryTypes}
   
-  ${gameInputs}
   ${quizInputs}
 
   type Subscription {

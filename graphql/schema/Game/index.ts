@@ -25,22 +25,13 @@ export const gameTypes = `
   type Answer {
     playerId: ID!
     answer: String!
-  }
-`;
-
-export const gameInputs = `
-  input CurrentQuizItemInput {
-    quizId: ID!
-    level: String!
-    quizItemId: Int!
-    createdAtTimestamp: Int!
+    answerType: String!
   }
 `;
 
 export const gameSubscriptions = `
   gamePlayersUpdated(shortId:String!): Game!
   gameStageUpdated(shortId:String!): Game!
-  gameCurrentQuizItemUpdated(shortId:String!): Game!
   playerAnswered(shortId:String!): Answer!
 `;
 
@@ -53,6 +44,5 @@ export const gameMutations = `
   deleteGame(shortId:String!): String!
   addPlayerToGame(shortId:String!, playerId:ID!): String!
   updateGameStage(shortId:String!, stage:String!): String!
-  updateGameCurrentQuizItem(shortId:String!, currentQuizItem:CurrentQuizItemInput!): String!
-  giveAnswer(shortId:String!, playerId:ID!, answer:String!): String!
+  giveAnswer(shortId:String!, playerId:ID!, answer:String!, answerType: String!): String!
 `;

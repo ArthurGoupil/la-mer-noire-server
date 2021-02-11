@@ -23,15 +23,7 @@ interface Stage {
 
 interface Answer {
   answer: string;
-}
-
-interface CurrentQuizItem {
-  currentQuizItem: {
-    quizId: string;
-    level: "beginner" | "intermediate" | "expert";
-    quizItemId: number;
-    createdAtTimestamp: number;
-  };
+  answerType: "duo" | "carre" | "cash";
 }
 
 const pubsub = new PubSub();
@@ -50,17 +42,6 @@ const resolvers = {
         () => pubsub.asyncIterator([ESubscriptions.GAME_STAGE_UPDATED]),
         (payload, variables) => {
           return payload.gameStageUpdated.shortId === variables.shortId;
-        },
-      ),
-    },
-    gameCurrentQuizItemUpdated: {
-      subscribe: withFilter(
-        () =>
-          pubsub.asyncIterator([ESubscriptions.GAME_CURRENT_QUIZ_ITEM_UPDATED]),
-        (payload, variables) => {
-          return (
-            payload.gameCurrentQuizItemUpdated.shortId === variables.shortId
-          );
         },
       ),
     },
@@ -170,35 +151,19 @@ const resolvers = {
         throw error;
       }
     },
-    updateGameCurrentQuizItem: async (
+    giveAnswer: async (
       root,
-      { shortId, currentQuizItem }: ShortId & CurrentQuizItem,
+      { shortId, playerId, answer, answerType }: ShortId & PlayerId & Answer,
     ) => {
       try {
-        const updatedGame = await Game.findOneAndUpdate(
-          { shortId },
-          { $set: { currentQuizItem } },
-          { runValidators: true, new: true, useFindAndModify: false },
-        ).populate("players.player");
-
-        pubsub.publish(ESubscriptions.GAME_CURRENT_QUIZ_ITEM_UPDATED, {
-          gameCurrentQuizItemUpdated: updatedGame,
+        pubsub.publish(ESubscriptions.PLAYER_ANSWERED, {
+          playerAnswered: { shortId, playerId, answer, answerType },
         });
 
-        return `CurrentQuizItem of ${shortId} updated.`;
+        return `Answer given from ${shortId} by ${playerId}.`;
       } catch (error) {
         throw error;
       }
-    },
-    giveAnswer: async (
-      root,
-      { shortId, playerId, answer }: ShortId & PlayerId & Answer,
-    ) => {
-      pubsub.publish(ESubscriptions.PLAYER_ANSWERED, {
-        playerAnswered: { shortId, playerId, answer },
-      });
-
-      return `Answer given from ${shortId} by ${playerId}.`;
     },
   },
 };
