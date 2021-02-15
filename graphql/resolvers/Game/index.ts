@@ -26,6 +26,10 @@ interface Answer {
   answerType: "duo" | "carre" | "cash";
 }
 
+interface QuizLevel {
+  level: "beginner" | "intermediate" | "expert";
+}
+
 const pubsub = new PubSub();
 
 const resolvers = {
@@ -161,6 +165,38 @@ const resolvers = {
         });
 
         return `Answer given from ${shortId} by ${playerId}.`;
+      } catch (error) {
+        throw error;
+      }
+    },
+    generateNewCurrentQuizItem: async (
+      root,
+      { shortId, level }: ShortId & QuizLevel,
+    ) => {
+      try {
+        const randomQuizId = (
+          await Quiz.aggregate([
+            {
+              $sample: { size: 1 },
+            },
+          ])
+        )[0]._id;
+        await Game.findOneAndUpdate(
+          { shortId },
+          {
+            $set: {
+              currentQuizItem: {
+                quizId: randomQuizId,
+                level,
+                quizItemId: getRandomQuizItemId(),
+                createdAtTimestamp: Math.floor(Date.now() / 1000),
+              },
+            },
+          },
+          { useFindAndModify: false, runValidators: true },
+        );
+
+        return `CurrentQuizItem of ${shortId} updated.`;
       } catch (error) {
         throw error;
       }

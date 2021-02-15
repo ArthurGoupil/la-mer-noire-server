@@ -45,4 +45,5 @@ export const gameMutations = `
   addPlayerToGame(shortId:String!, playerId:ID!): String!
   updateGameStage(shortId:String!, stage:String!): String!
   giveAnswer(shortId:String!, playerId:ID!, answer:String!, answerType: String!): String!
+  generateNewCurrentQuizItem(shortId:String!, level:String!): String!
 `;
