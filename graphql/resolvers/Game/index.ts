@@ -44,9 +44,8 @@ const resolvers = {
     gameStageUpdated: {
       subscribe: withFilter(
         () => pubsub.asyncIterator([ESubscriptions.GAME_STAGE_UPDATED]),
-        (payload, variables) => {
-          return payload.gameStageUpdated.shortId === variables.shortId;
-        },
+        (payload, variables) =>
+          payload.gameStageUpdated.shortId === variables.shortId,
       ),
     },
     playerAnswered: {
@@ -54,6 +53,13 @@ const resolvers = {
         () => pubsub.asyncIterator([ESubscriptions.PLAYER_ANSWERED]),
         (payload, variables) =>
           payload.playerAnswered.shortId === variables.shortId,
+      ),
+    },
+    currentQuizItemUpdated: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator([ESubscriptions.CURRENT_QUIZ_ITEM_UPDATED]),
+        (payload, variables) =>
+          payload.currentQuizItemUpdated.shortId === variables.shortId,
       ),
     },
   },
@@ -181,7 +187,7 @@ const resolvers = {
             },
           ])
         )[0]._id;
-        await Game.findOneAndUpdate(
+        const updatedGame = await Game.findOneAndUpdate(
           { shortId },
           {
             $set: {
@@ -193,8 +199,12 @@ const resolvers = {
               },
             },
           },
-          { useFindAndModify: false, runValidators: true },
-        );
+          { new: true, useFindAndModify: false, runValidators: true },
+        ).populate("players.player");
+
+        pubsub.publish(ESubscriptions.CURRENT_QUIZ_ITEM_UPDATED, {
+          currentQuizItemUpdated: updatedGame,
+        });
 
         return `CurrentQuizItem of ${shortId} updated.`;
       } catch (error) {

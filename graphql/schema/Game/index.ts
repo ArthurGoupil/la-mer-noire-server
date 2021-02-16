@@ -33,6 +33,7 @@ export const gameSubscriptions = `
   gamePlayersUpdated(shortId:String!): Game!
   gameStageUpdated(shortId:String!): Game!
   playerAnswered(shortId:String!): Answer!
+  currentQuizItemUpdated(shortId:String!): Game!
 `;
 
 export const gameQueries = `
