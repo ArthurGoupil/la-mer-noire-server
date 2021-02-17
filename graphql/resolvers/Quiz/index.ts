@@ -56,6 +56,7 @@ const resolvers = {
           category,
           theme,
           subTheme,
+          level,
           createdAtTimestamp,
           quiz: quizItems[level].find(
             (quiz: QuizItem) => quiz.quizItemId === quizItemId,

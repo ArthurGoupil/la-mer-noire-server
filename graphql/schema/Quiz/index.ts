@@ -24,6 +24,7 @@ export const quizTypes = `
     category: Category!
     theme: String!
     subTheme: String!
+    level: String!
     createdAtTimestamp: Int!
     quiz: QuizItem!
   }
