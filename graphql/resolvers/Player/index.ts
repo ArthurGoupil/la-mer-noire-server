@@ -1,11 +1,6 @@
+import { ApolloError } from "apollo-server-express";
 import Player from "../../../models/Player";
-
-interface Name {
-  name: string;
-}
-interface Id {
-  id: string;
-}
+import { Id, Name } from "../../../models/utils/Commons";
 
 const resolvers = {
   Query: {
@@ -13,14 +8,14 @@ const resolvers = {
       try {
         return await Player.find();
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
     getPlayer: async (root, { id }: Id) => {
       try {
         return Player.findById(id);
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
   },
@@ -33,14 +28,14 @@ const resolvers = {
         const newPlayer = await player.save();
         return newPlayer;
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
     deletePlayer: async (root, { id }: Id) => {
       try {
         return await Player.findOneAndDelete({ _id: id });
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
   },

@@ -43,7 +43,7 @@ export const gameQueries = `
 export const gameMutations = `
   createGame(name:String!): Game!
   deleteGame(shortId:String!): String!
-  addPlayerToGame(shortId:String!, playerId:ID!): String!
+  addPlayerToGame(shortId:String!, name:String!): ID!
   updateGameStage(shortId:String!, stage:String!): String!
   giveAnswer(shortId:String!, playerId:ID!, answer:String!, answerType: String!): String!
   generateNewCurrentQuizItem(shortId:String!, level:String!): String!

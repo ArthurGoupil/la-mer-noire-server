@@ -1,3 +1,4 @@
+import { ApolloError } from "apollo-server-express";
 import Quiz from "../../../models/Quiz";
 
 interface Id {
@@ -34,12 +35,8 @@ interface QuizItemDataInput {
   createdAtTimestamp: number;
 }
 
-interface QuizResponse {
-  category: { _id: string; name: string };
-  theme: string;
-  subTheme: string;
-  quizItems: [QuizItem];
-}
+export type QuizItemId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type QuizItemLevel = "beginner" | "intermediate" | "expert";
 
 const resolvers = {
   Query: {
@@ -48,8 +45,8 @@ const resolvers = {
       { quizId, level, quizItemId, createdAtTimestamp }: QuizItemDataInput,
     ) => {
       try {
-        const quiz: unknown = await Quiz.findById(quizId).populate("category");
-        const { category, theme, subTheme, quizItems } = quiz as QuizResponse;
+        const quiz = await Quiz.findById(quizId).populate("category");
+        const { category, theme, subTheme, quizItems } = quiz;
 
         return {
           quizId,
@@ -58,12 +55,10 @@ const resolvers = {
           subTheme,
           level,
           createdAtTimestamp,
-          quiz: quizItems[level].find(
-            (quiz: QuizItem) => quiz.quizItemId === quizItemId,
-          ),
+          quiz: quizItems[level].find((quiz) => quiz.quizItemId === quizItemId),
         };
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
   },
@@ -73,14 +68,14 @@ const resolvers = {
         const newQuiz = new Quiz(quizInput);
         return await newQuiz.save();
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
     deleteQuiz: async (root, { id }: Id) => {
       try {
         return await Quiz.findOneAndDelete({ _id: id });
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
   },

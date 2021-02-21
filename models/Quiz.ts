@@ -1,4 +1,32 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Document } from "mongoose";
+import { Category } from "./Category";
+
+type QuizItemId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+enum EQuizLevel {
+  beginner = "beginner",
+  intermediate = "intermediate",
+  expert = "expert",
+}
+export interface QuizLevel {
+  level: EQuizLevel;
+}
+
+interface QuizItem {
+  quizItemId: QuizItemId;
+  question: string;
+  choices: string[];
+  answer: string;
+  anecdote?: string;
+}
+
+interface Quiz extends Document {
+  _id: string;
+  category: Category;
+  theme: string;
+  subTheme: string;
+  difficulty: number;
+  quizItems: { [key in EQuizLevel]: QuizItem[] };
+}
 
 const quizSchema = new Schema(
   {
@@ -48,6 +76,6 @@ const quizSchema = new Schema(
   { timestamps: true },
 );
 
-const quizModel = model("Quiz", quizSchema);
+const quizModel = model<Quiz>("Quiz", quizSchema);
 
 export default quizModel;

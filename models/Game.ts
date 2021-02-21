@@ -1,5 +1,31 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Document } from "mongoose";
 import { EGameStage } from "../constants/GameStage.constants";
+import { QuizItemId, QuizItemLevel } from "../graphql/resolvers/Quiz";
+import { Player } from "../models/Player";
+
+interface Game extends Document {
+  _id: string;
+  shortId: string;
+  name: string;
+  stage: EGameStage;
+  players: [PlayerData];
+  currentPlayers: Player[];
+  currentQuizItem: CurrentQuizItem;
+  createdAt: string;
+  updatedAd?: string;
+}
+
+export interface PlayerData {
+  player: Player;
+  points: number;
+}
+
+interface CurrentQuizItem {
+  quizId: string;
+  level: QuizItemLevel;
+  quizItemId: QuizItemId;
+  createdAtTimestamp: number;
+}
 
 const gameSchema = new Schema(
   {
@@ -69,6 +95,6 @@ const gameSchema = new Schema(
   { timestamps: true },
 );
 
-const gameModel = model("Game", gameSchema);
+const gameModel = model<Game>("Game", gameSchema);
 
 export default gameModel;

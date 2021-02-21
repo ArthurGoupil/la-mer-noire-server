@@ -1,34 +1,19 @@
 import { PubSub, withFilter } from "graphql-subscriptions";
-
 import * as cryptoRandomString from "crypto-random-string";
-import Game from "../../../models/Game";
-import Quiz from "../../../models/Quiz";
+import { ApolloError } from "apollo-server-express";
+
+import Game, { PlayerData } from "../../../models/Game";
+import {
+  Answer,
+  Name,
+  PlayerId,
+  ShortId,
+  Stage,
+} from "../../../models/utils/Commons";
+import Quiz, { QuizLevel } from "../../../models/Quiz";
+import PlayerModel from "../../../models/Player";
 import { ESubscriptions } from "../../../constants/Subscriptions.constants";
 import getRandomQuizItemId from "../../../utils/getRandomQuizItemId.util";
-
-interface Name {
-  name: string;
-}
-interface ShortId {
-  shortId: string;
-}
-
-interface PlayerId {
-  playerId: string;
-}
-
-interface Stage {
-  stage: string;
-}
-
-interface Answer {
-  answer: string;
-  answerType: "duo" | "carre" | "cash";
-}
-
-interface QuizLevel {
-  level: "beginner" | "intermediate" | "expert";
-}
 
 const pubsub = new PubSub();
 
@@ -76,7 +61,7 @@ const resolvers = {
           "currentPlayers",
         ]);
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
   },
@@ -105,7 +90,7 @@ const resolvers = {
         pubsub.publish(ESubscriptions.GAME_CREATED, { gameCreated: newGame });
         return newGame;
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
     deleteGame: async (root, { shortId }: ShortId) => {
@@ -114,27 +99,39 @@ const resolvers = {
 
         return `Game ${shortId} deleted.`;
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
-    addPlayerToGame: async (
-      root,
-      { shortId, playerId }: ShortId & PlayerId,
-    ) => {
+    addPlayerToGame: async (root, { shortId, name }: ShortId & Name) => {
       try {
-        const updatedGame = await Game.findOneAndUpdate(
-          { shortId },
-          { $addToSet: { players: { player: playerId, points: 0 } } },
-          { new: true, useFindAndModify: false },
-        ).populate("players.player");
-
-        pubsub.publish(ESubscriptions.GAME_PLAYERS_UPDATED, {
-          gamePlayersUpdated: updatedGame,
+        const game = await Game.findOne({ shortId }).populate("players.player");
+        game.players.forEach((playerData: PlayerData) => {
+          if (playerData.player.name.trim() === name.trim()) {
+            throw new ApolloError(
+              "Ce nom est déjà utilisé dans cette partie.",
+              "NAME_DUPLICATE",
+            );
+          }
         });
 
-        return `Player added to ${shortId}`;
+        const player = new PlayerModel({
+          name,
+        });
+        const newPlayer = await player.save();
+
+        game.players.push({
+          player: newPlayer,
+          points: 0,
+        });
+        await game.save();
+
+        pubsub.publish(ESubscriptions.GAME_PLAYERS_UPDATED, {
+          gamePlayersUpdated: game,
+        });
+
+        return newPlayer._id;
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
     updateGameStage: async (root, { shortId, stage }: ShortId & Stage) => {
@@ -158,7 +155,7 @@ const resolvers = {
 
         return `Stage of ${shortId} updated.`;
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
     giveAnswer: async (
@@ -172,7 +169,7 @@ const resolvers = {
 
         return `Answer given from ${shortId} by ${playerId}.`;
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
     generateNewCurrentQuizItem: async (
@@ -208,7 +205,7 @@ const resolvers = {
 
         return `CurrentQuizItem of ${shortId} updated.`;
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
   },

@@ -1,11 +1,6 @@
+import { ApolloError } from "apollo-server-express";
 import Category from "../../../models/Category";
-
-interface Name {
-  name: string;
-}
-interface Id {
-  id: string;
-}
+import { Id, Name } from "../../../models/utils/Commons";
 
 const resolvers = {
   Query: {
@@ -13,21 +8,21 @@ const resolvers = {
       try {
         return await Category.find();
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
     getCategory: async (root, { id }: Id) => {
       try {
         return await Category.findById(id);
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
     getRandomCategory: async () => {
       try {
         return (await Category.aggregate([{ $sample: { size: 1 } }]))[0];
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
   },
@@ -37,14 +32,14 @@ const resolvers = {
         const newCategory = new Category({ name });
         return await newCategory.save();
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
     deleteCategory: async (root, { id }: Id) => {
       try {
         return await Category.findOneAndDelete({ _id: id });
       } catch (error) {
-        throw error;
+        throw new ApolloError(error.message, error.extensions.code);
       }
     },
   },

@@ -1,4 +1,11 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Document } from "mongoose";
+
+export interface Player extends Document {
+  _id: string;
+  name: string;
+  createdAt: string;
+  updatedAd?: string;
+}
 
 const playerSchema = new Schema(
   {
@@ -10,6 +17,6 @@ const playerSchema = new Schema(
   { timestamps: true },
 );
 
-const playerModel = model("Player", playerSchema);
+const playerModel = model<Player>("Player", playerSchema);
 
 export default playerModel;
