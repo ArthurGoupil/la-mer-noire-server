@@ -52,7 +52,7 @@ const resolvers = {
   Query: {
     game: async (root, { shortId }: ShortId) => {
       try {
-        return Game.findOne({ shortId }).populate([
+        return Game.findOne({ shortId: shortId.toUpperCase() }).populate([
           "players.player",
           {
             path: "currentState.question.quiz",
