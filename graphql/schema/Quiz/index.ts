@@ -20,6 +20,7 @@ export const quizTypes = `
     quizItems: QuizItemsByLevel!
   }
   type QuizItemData {
+    quizItemSignature: String!
     quizId: String!
     category: Category!
     theme: String!

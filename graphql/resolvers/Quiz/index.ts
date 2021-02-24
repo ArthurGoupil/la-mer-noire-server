@@ -45,17 +45,21 @@ const resolvers = {
       { quizId, level, quizItemId, createdAtTimestamp }: QuizItemDataInput,
     ) => {
       try {
-        const quiz = await Quiz.findById(quizId).populate("category");
-        const { category, theme, subTheme, quizItems } = quiz;
+        const quizData = await Quiz.findById(quizId).populate("category");
+        const { category, theme, subTheme, quizItems } = quizData;
+        const quiz = quizItems[level].find(
+          (quiz) => quiz.quizItemId === quizItemId,
+        );
 
         return {
+          quizItemSignature: `${quizId}-${level}-${quiz.quizItemId}`,
           quizId,
           category,
           theme,
           subTheme,
           level,
           createdAtTimestamp,
-          quiz: quizItems[level].find((quiz) => quiz.quizItemId === quizItemId),
+          quiz,
         };
       } catch (error) {
         throw new ApolloError(error.message, error.extensions.code);
