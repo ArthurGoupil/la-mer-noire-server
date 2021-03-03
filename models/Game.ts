@@ -24,7 +24,6 @@ interface CurrentQuizItem {
   quizId: string;
   level: QuizItemLevel;
   quizItemId: QuizItemId;
-  createdAtTimestamp: number;
 }
 
 const gameSchema = new Schema(
@@ -76,19 +75,13 @@ const gameSchema = new Schema(
       quizId: {
         type: Schema.Types.ObjectId,
         ref: "Quiz",
-        required: true,
       },
       level: {
         type: String,
         enum: ["beginner", "intermediate", "expert"],
-        required: true,
       },
       quizItemId: {
         type: String,
-        required: true,
-      },
-      createdAtTimestamp: {
-        type: Date,
       },
     },
   },

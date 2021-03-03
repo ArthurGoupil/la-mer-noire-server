@@ -8,14 +8,14 @@ const resolvers = {
       try {
         return await Player.find();
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
     getPlayer: async (root, { id }: Id) => {
       try {
         return Player.findById(id);
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
   },
@@ -28,14 +28,14 @@ const resolvers = {
         const newPlayer = await player.save();
         return newPlayer;
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
     deletePlayer: async (root, { id }: Id) => {
       try {
         return await Player.findOneAndDelete({ _id: id });
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
   },

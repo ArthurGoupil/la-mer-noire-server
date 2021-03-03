@@ -21,12 +21,10 @@ export const quizTypes = `
   }
   type QuizItemData {
     quizItemSignature: String!
-    quizId: String!
     category: Category!
     theme: String!
     subTheme: String!
     level: String!
-    createdAtTimestamp: Int!
     quiz: QuizItem!
   }
 `;
@@ -54,7 +52,7 @@ export const quizInputs = `
 `;
 
 export const quizQueries = `
-  quizItemData(quizId:ID!, level:String!, quizItemId:Int!, createdAtTimestamp:Int!): QuizItemData!
+  quizItemData(quizId:ID!, level:String!, quizItemId:Int!): QuizItemData!
 `;
 
 export const quizMutations = `

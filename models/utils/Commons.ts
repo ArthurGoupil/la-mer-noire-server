@@ -23,3 +23,7 @@ export interface Answer {
   answer: string;
   answerType: "duo" | "carre" | "cash";
 }
+
+export interface QuizItemSignature {
+  quizItemSignature: string;
+}

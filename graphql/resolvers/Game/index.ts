@@ -7,6 +7,7 @@ import {
   Answer,
   Name,
   PlayerId,
+  QuizItemSignature,
   ShortId,
   Stage,
 } from "../../../models/utils/Commons";
@@ -61,7 +62,7 @@ const resolvers = {
           "currentPlayers",
         ]);
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
   },
@@ -70,27 +71,15 @@ const resolvers = {
     createGame: async (root, { name }: Name) => {
       try {
         const shortId = cryptoRandomString({ length: 5 }).toUpperCase();
-        const randomQuizId = (
-          await Quiz.aggregate([
-            {
-              $sample: { size: 1 },
-            },
-          ])
-        )[0]._id;
         const game = new Game({
           shortId,
           name,
-          currentQuizItem: {
-            quizId: randomQuizId,
-            level: "beginner",
-            quizItemId: getRandomQuizItemId(),
-          },
         });
         const newGame = await game.save();
         pubsub.publish(ESubscriptions.GAME_CREATED, { gameCreated: newGame });
         return newGame;
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
     deleteGame: async (root, { shortId }: ShortId) => {
@@ -99,7 +88,7 @@ const resolvers = {
 
         return `Game ${shortId} deleted.`;
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
     addPlayerToGame: async (root, { shortId, name }: ShortId & Name) => {
@@ -131,7 +120,7 @@ const resolvers = {
 
         return newPlayer._id;
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
     updateGameStage: async (root, { shortId, stage }: ShortId & Stage) => {
@@ -141,9 +130,6 @@ const resolvers = {
           {
             $set: {
               stage,
-              "currentQuizItem.createdAtTimestamp": Math.floor(
-                Date.now() / 1000,
-              ),
             },
           },
           { new: true, useFindAndModify: false, runValidators: true },
@@ -155,21 +141,33 @@ const resolvers = {
 
         return `Stage of ${shortId} updated.`;
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
     giveAnswer: async (
       root,
-      { shortId, playerId, answer, answerType }: ShortId & PlayerId & Answer,
+      {
+        shortId,
+        playerId,
+        quizItemSignature,
+        answer,
+        answerType,
+      }: ShortId & PlayerId & Answer & QuizItemSignature,
     ) => {
       try {
         pubsub.publish(ESubscriptions.PLAYER_ANSWERED, {
-          playerAnswered: { shortId, playerId, answer, answerType },
+          playerAnswered: {
+            shortId,
+            playerId,
+            quizItemSignature,
+            answer,
+            answerType,
+          },
         });
 
         return `Answer given from ${shortId} by ${playerId}.`;
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
     generateNewCurrentQuizItem: async (
@@ -192,7 +190,6 @@ const resolvers = {
                 quizId: randomQuizId,
                 level,
                 quizItemId: getRandomQuizItemId(),
-                createdAtTimestamp: Math.floor(Date.now() / 1000),
               },
             },
           },
@@ -205,7 +202,7 @@ const resolvers = {
 
         return `CurrentQuizItem of ${shortId} updated.`;
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
   },

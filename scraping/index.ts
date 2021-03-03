@@ -116,7 +116,7 @@ connect(process.env.MONGO_DB_URL, {
       }
     }
   } catch (error) {
-    throw new ApolloError(error.message, error.extensions.code);
+    throw new ApolloError(error.message);
   }
 
   process.exit();

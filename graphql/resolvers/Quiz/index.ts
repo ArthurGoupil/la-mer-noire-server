@@ -32,7 +32,6 @@ interface QuizItemDataInput {
   quizId: string;
   level: "beginner" | "intermediate" | "expert";
   quizItemId: number;
-  createdAtTimestamp: number;
 }
 
 export type QuizItemId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
@@ -42,7 +41,7 @@ const resolvers = {
   Query: {
     quizItemData: async (
       root,
-      { quizId, level, quizItemId, createdAtTimestamp }: QuizItemDataInput,
+      { quizId, level, quizItemId }: QuizItemDataInput,
     ) => {
       try {
         const quizData = await Quiz.findById(quizId).populate("category");
@@ -53,16 +52,14 @@ const resolvers = {
 
         return {
           quizItemSignature: `${quizId}-${level}-${quiz.quizItemId}`,
-          quizId,
           category,
           theme,
           subTheme,
           level,
-          createdAtTimestamp,
           quiz,
         };
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
   },
@@ -72,14 +69,14 @@ const resolvers = {
         const newQuiz = new Quiz(quizInput);
         return await newQuiz.save();
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
     deleteQuiz: async (root, { id }: Id) => {
       try {
         return await Quiz.findOneAndDelete({ _id: id });
       } catch (error) {
-        throw new ApolloError(error.message, error.extensions.code);
+        throw new ApolloError(error.message);
       }
     },
   },
