@@ -11,7 +11,7 @@ import {
   ShortId,
   Stage,
 } from "../../../models/utils/Commons";
-import Quiz, { QuizLevel } from "../../../models/Quiz";
+import Quiz, { PlayersCanAnswer, QuizLevel } from "../../../models/Quiz";
 import PlayerModel from "../../../models/Player";
 import { ESubscriptions } from "../../../constants/Subscriptions.constants";
 import getRandomQuizItemId from "../../../utils/getRandomQuizItemId.util";
@@ -190,6 +190,7 @@ const resolvers = {
                 quizId: randomQuizId,
                 level,
                 quizItemId: getRandomQuizItemId(),
+                playersCanAnswer: false,
               },
             },
           },
@@ -201,6 +202,30 @@ const resolvers = {
         });
 
         return `CurrentQuizItem of ${shortId} updated.`;
+      } catch (error) {
+        throw new ApolloError(error.message);
+      }
+    },
+    updatePlayersCanAnswer: async (
+      root,
+      { shortId, playersCanAnswer }: ShortId & PlayersCanAnswer,
+    ) => {
+      try {
+        const updatedGame = await Game.findOneAndUpdate(
+          { shortId },
+          {
+            $set: {
+              "currentQuizItem.playersCanAnswer": playersCanAnswer,
+            },
+          },
+          { new: true, useFindAndModify: false, runValidators: true },
+        ).populate("players.player");
+
+        pubsub.publish(ESubscriptions.CURRENT_QUIZ_ITEM_UPDATED, {
+          currentQuizItemUpdated: updatedGame,
+        });
+
+        return `playersCanAnswer of ${shortId} updated.`;
       } catch (error) {
         throw new ApolloError(error.message);
       }

@@ -24,6 +24,7 @@ interface CurrentQuizItem {
   quizId: string;
   level: QuizItemLevel;
   quizItemId: QuizItemId;
+  playersCanAnswer: boolean;
 }
 
 const gameSchema = new Schema(
@@ -82,6 +83,9 @@ const gameSchema = new Schema(
       },
       quizItemId: {
         type: String,
+      },
+      playersCanAnswer: {
+        type: Boolean,
       },
     },
   },

@@ -11,6 +11,10 @@ export interface QuizLevel {
   level: EQuizLevel;
 }
 
+export interface PlayersCanAnswer {
+  playersCanAnswer: boolean;
+}
+
 interface QuizItem {
   quizItemId: QuizItemId;
   question: string;

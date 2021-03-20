@@ -20,6 +20,7 @@ export const gameTypes = `
     quizId: ID
     level: String
     quizItemId: Int
+    playersCanAnswer: Boolean
   }
   type Answer {
     playerId: ID!
@@ -47,4 +48,5 @@ export const gameMutations = `
   updateGameStage(shortId:String!, stage:String!): String!
   giveAnswer(shortId:String!, playerId:ID!, quizItemSignature:String!, answer:String!, answerType: String!): String!
   generateNewCurrentQuizItem(shortId:String!, level:String!): String!
+  updatePlayersCanAnswer(shortId:String!, playersCanAnswer:Boolean!): String!
 `;
