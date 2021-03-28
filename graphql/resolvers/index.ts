@@ -19,9 +19,6 @@ export default {
     ...playerQueries,
     ...quizQueries,
     ...categoryQueries,
-    timestamp: () => {
-      return Math.floor(Date.now() / 1000);
-    },
   },
   Mutation: {
     ...gameMutations,

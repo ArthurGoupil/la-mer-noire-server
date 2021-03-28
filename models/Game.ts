@@ -25,6 +25,15 @@ interface CurrentQuizItem {
   level: QuizItemLevel;
   quizItemId: QuizItemId;
   playersCanAnswer: boolean;
+  playersCanBuzz: boolean;
+}
+
+export interface PlayersCanAnswer {
+  playersCanAnswer: boolean;
+}
+
+export interface PlayersCanBuzz {
+  playersCanBuzz: boolean;
 }
 
 const gameSchema = new Schema(
@@ -85,6 +94,9 @@ const gameSchema = new Schema(
         type: String,
       },
       playersCanAnswer: {
+        type: Boolean,
+      },
+      playersCanBuzz: {
         type: Boolean,
       },
     },

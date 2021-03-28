@@ -2,7 +2,11 @@ import { PubSub, withFilter } from "graphql-subscriptions";
 import * as cryptoRandomString from "crypto-random-string";
 import { ApolloError } from "apollo-server-express";
 
-import Game, { PlayerData } from "../../../models/Game";
+import Game, {
+  PlayerData,
+  PlayersCanAnswer,
+  PlayersCanBuzz,
+} from "../../../models/Game";
 import {
   Answer,
   Name,
@@ -11,7 +15,7 @@ import {
   ShortId,
   Stage,
 } from "../../../models/utils/Commons";
-import Quiz, { PlayersCanAnswer, QuizLevel } from "../../../models/Quiz";
+import Quiz, { QuizLevel } from "../../../models/Quiz";
 import PlayerModel from "../../../models/Player";
 import { ESubscriptions } from "../../../constants/Subscriptions.constants";
 import getRandomQuizItemId from "../../../utils/getRandomQuizItemId.util";
@@ -191,6 +195,7 @@ const resolvers = {
                 level,
                 quizItemId: getRandomQuizItemId(),
                 playersCanAnswer: false,
+                playersCanBuzz: false,
               },
             },
           },
@@ -226,6 +231,30 @@ const resolvers = {
         });
 
         return `playersCanAnswer of ${shortId} updated.`;
+      } catch (error) {
+        throw new ApolloError(error.message);
+      }
+    },
+    updatePlayersCanBuzz: async (
+      root,
+      { shortId, playersCanBuzz }: ShortId & PlayersCanBuzz,
+    ) => {
+      try {
+        const updatedGame = await Game.findOneAndUpdate(
+          { shortId },
+          {
+            $set: {
+              "currentQuizItem.playersCanBuzz": playersCanBuzz,
+            },
+          },
+          { new: true, useFindAndModify: false, runValidators: true },
+        ).populate("players.player");
+
+        pubsub.publish(ESubscriptions.CURRENT_QUIZ_ITEM_UPDATED, {
+          currentQuizItemUpdated: updatedGame,
+        });
+
+        return `playersCanBuzz of ${shortId} updated.`;
       } catch (error) {
         throw new ApolloError(error.message);
       }
