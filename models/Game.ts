@@ -9,7 +9,6 @@ interface Game extends Document {
   name: string;
   stage: EGameStage;
   players: [PlayerData];
-  currentPlayers: Player[];
   currentQuizItem: CurrentQuizItem;
   createdAt: string;
   updatedAd?: string;
@@ -24,6 +23,7 @@ interface CurrentQuizItem {
   quizId: string;
   level: QuizItemLevel;
   quizItemId: QuizItemId;
+  currentPlayers: string[];
   playersCanAnswer: boolean;
   playersCanBuzz: boolean;
 }
@@ -34,6 +34,10 @@ export interface PlayersCanAnswer {
 
 export interface PlayersCanBuzz {
   playersCanBuzz: boolean;
+}
+
+export interface CurrentPlayers {
+  currentPlayers: string[];
 }
 
 const gameSchema = new Schema(
@@ -71,16 +75,6 @@ const gameSchema = new Schema(
       default: [],
       required: true,
     },
-    currentPlayers: {
-      type: [
-        {
-          type: Schema.Types.ObjectId,
-          ref: "Player",
-        },
-      ],
-      default: [],
-      required: true,
-    },
     currentQuizItem: {
       quizId: {
         type: Schema.Types.ObjectId,
@@ -92,6 +86,16 @@ const gameSchema = new Schema(
       },
       quizItemId: {
         type: String,
+      },
+      currentPlayers: {
+        type: [
+          {
+            type: Schema.Types.ObjectId,
+            ref: "Player",
+          },
+        ],
+        default: [],
+        required: true,
       },
       playersCanAnswer: {
         type: Boolean,

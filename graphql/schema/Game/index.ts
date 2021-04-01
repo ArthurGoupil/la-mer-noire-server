@@ -5,7 +5,6 @@ export const gameTypes = `
     name: String!
     stage: String!
     players: [GamePlayer]!
-    currentPlayers: [Player]!
     currentQuizItem: CurrentQuizItem!
     createdAt: String!
   }
@@ -20,7 +19,9 @@ export const gameTypes = `
     quizId: ID
     level: String
     quizItemId: Int
+    currentPlayers: [ID]
     playersCanAnswer: Boolean
+    playersCanBuzz: Boolean
   }
   type Answer {
     playerId: ID!
@@ -50,4 +51,5 @@ export const gameMutations = `
   generateNewCurrentQuizItem(shortId:String!, level:String!): String!
   updatePlayersCanAnswer(shortId:String!, playersCanAnswer:Boolean!): String!
   updatePlayersCanBuzz(shortId:String!, playersCanBuzz:Boolean!): String!
+  updateCurrentPlayers(shortId:String!, currentPlayers:[ID]!): String!
 `;

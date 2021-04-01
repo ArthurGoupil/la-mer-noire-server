@@ -3,6 +3,7 @@ import * as cryptoRandomString from "crypto-random-string";
 import { ApolloError } from "apollo-server-express";
 
 import Game, {
+  CurrentPlayers,
   PlayerData,
   PlayersCanAnswer,
   PlayersCanBuzz,
@@ -63,7 +64,6 @@ const resolvers = {
             path: "currentState.question.quiz",
             populate: { path: "category" },
           },
-          "currentPlayers",
         ]);
       } catch (error) {
         throw new ApolloError(error.message);
@@ -194,6 +194,7 @@ const resolvers = {
                 quizId: randomQuizId,
                 level,
                 quizItemId: getRandomQuizItemId(),
+                currentPlayers: [],
                 playersCanAnswer: false,
                 playersCanBuzz: false,
               },
@@ -255,6 +256,30 @@ const resolvers = {
         });
 
         return `playersCanBuzz of ${shortId} updated.`;
+      } catch (error) {
+        throw new ApolloError(error.message);
+      }
+    },
+    updateCurrentPlayers: async (
+      root,
+      { shortId, currentPlayers }: ShortId & CurrentPlayers,
+    ) => {
+      try {
+        const updatedGame = await Game.findOneAndUpdate(
+          { shortId },
+          {
+            $set: {
+              "currentQuizItem.currentPlayers": currentPlayers,
+            },
+          },
+          { new: true, useFindAndModify: false, runValidators: true },
+        ).populate("players.player");
+
+        pubsub.publish(ESubscriptions.CURRENT_QUIZ_ITEM_UPDATED, {
+          currentQuizItemUpdated: updatedGame,
+        });
+
+        return `currentPlayers of ${shortId} updated.`;
       } catch (error) {
         throw new ApolloError(error.message);
       }
