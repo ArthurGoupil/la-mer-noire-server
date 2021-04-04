@@ -6,6 +6,8 @@ import { createServer } from "http";
 import graphqlSchema from "./graphql/schema";
 import resolvers from "./graphql/resolvers";
 
+require("events").defaultMaxListeners = 30;
+
 connect(process.env.MONGO_DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
