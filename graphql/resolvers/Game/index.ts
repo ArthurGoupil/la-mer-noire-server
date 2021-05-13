@@ -16,10 +16,11 @@ import {
   ShortId,
   Stage,
 } from "../../../models/utils/Commons";
-import Quiz, { QuizLevel } from "../../../models/Quiz";
+import Quiz, { QuizLevel, RawQuiz } from "../../../models/Quiz";
 import PlayerModel from "../../../models/Player";
 import { ESubscriptions } from "../../../constants/Subscriptions.constants";
-import getRandomQuizItemId from "../../../utils/getRandomQuizItemId.util";
+import { getRandomQuizItemId } from "../../../utils/getRandomQuizItemId.util";
+import { getScubadoobidooQuizItems } from "../../../utils/getScubadoobidooQuizItems.util";
 
 const pubsub = new PubSub();
 
@@ -58,13 +59,39 @@ const resolvers = {
   Query: {
     game: async (root, { shortId }: ShortId) => {
       try {
-        return Game.findOne({ shortId: shortId.toUpperCase() }).populate([
+        return Game.findOne({ shortId: shortId.toUpperCase() }).populate(
           "players.player",
-          {
-            path: "currentState.question.quiz",
-            populate: { path: "category" },
+        );
+      } catch (error) {
+        throw new ApolloError(error.message);
+      }
+    },
+    scubadoobidooQuizItems: async (root, { shortId }: ShortId) => {
+      try {
+        const game = await Game.findOne({
+          shortId: shortId.toUpperCase(),
+        });
+
+        const scubadoobidooQuizItems = game.scubadoobidooQuizItemSignatures.map(
+          async (scubadoobidooQuizItemSignature) => {
+            const quiz = await Quiz.findById(
+              scubadoobidooQuizItemSignature.quizId,
+            );
+            const quizItem = quiz.quizItems[
+              scubadoobidooQuizItemSignature.level
+            ].find(
+              (quizItem) =>
+                quizItem.quizItemId ===
+                scubadoobidooQuizItemSignature.quizItemId,
+            );
+
+            console.log({ ...quizItem });
+
+            return { ...quizItem, level: scubadoobidooQuizItemSignature.level };
           },
-        ]);
+        );
+
+        return scubadoobidooQuizItems;
       } catch (error) {
         throw new ApolloError(error.message);
       }
@@ -75,11 +102,30 @@ const resolvers = {
     createGame: async (root, { name }: Name) => {
       try {
         const shortId = cryptoRandomString({ length: 5 }).toUpperCase();
+
+        const scubadoobidooQuizzes = await Quiz.aggregate([
+          {
+            $sample: { size: 30 },
+          },
+        ]);
+
+        const scubadoobidooQuizItemSignatures = scubadoobidooQuizzes.map(
+          (quiz, index) => {
+            return {
+              quizId: quiz._id,
+              level: getScubadoobidooQuizItems({ index }),
+              quizItemId: getRandomQuizItemId(),
+            };
+          },
+        );
+
         const game = new Game({
           shortId,
           name,
+          scubadoobidooQuizItemSignatures,
         });
         const newGame = await game.save();
+
         pubsub.publish(ESubscriptions.GAME_CREATED, { gameCreated: newGame });
         return newGame;
       } catch (error) {

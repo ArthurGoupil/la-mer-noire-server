@@ -1,17 +1,14 @@
 import { Schema, model, Document } from "mongoose";
 import { Category } from "./Category";
 
-type QuizItemId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-enum EQuizLevel {
-  beginner = "beginner",
-  intermediate = "intermediate",
-  expert = "expert",
-}
+export type QuizItemId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type QuizItemLevel = "beginner" | "intermediate" | "expert";
+
 export interface QuizLevel {
-  level: EQuizLevel;
+  level: QuizItemLevel;
 }
 
-interface QuizItem {
+export interface QuizItem {
   quizItemId: QuizItemId;
   question: string;
   choices: string[];
@@ -19,13 +16,21 @@ interface QuizItem {
   anecdote?: string;
 }
 
+export interface RawQuiz {
+  _id: string;
+  category: Category;
+  theme: string;
+  subTheme: string;
+  difficulty: number;
+  quizItems: { [key: string]: QuizItem[] };
+}
 interface Quiz extends Document {
   _id: string;
   category: Category;
   theme: string;
   subTheme: string;
   difficulty: number;
-  quizItems: { [key in EQuizLevel]: QuizItem[] };
+  quizItems: { [key: string]: QuizItem[] };
 }
 
 const quizSchema = new Schema(

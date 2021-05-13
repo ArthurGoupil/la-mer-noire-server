@@ -1,16 +1,8 @@
 import { ApolloError } from "apollo-server-express";
-import Quiz from "../../../models/Quiz";
+import Quiz, { QuizItem } from "../../../models/Quiz";
 
 interface Id {
   id: string;
-}
-
-interface QuizItem {
-  quizItemId: number;
-  question: string;
-  choices: [string];
-  answer: string;
-  anecdote?: string;
 }
 
 interface QuizInput {
@@ -33,9 +25,6 @@ interface QuizItemDataInput {
   level: "beginner" | "intermediate" | "expert";
   quizItemId: number;
 }
-
-export type QuizItemId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-export type QuizItemLevel = "beginner" | "intermediate" | "expert";
 
 const resolvers = {
   Query: {
