@@ -58,46 +58,52 @@ connect(process.env.MONGO_DB_URL, {
           .map((link) => link.rawAttributes.href)
           .filter((link) => link && link.endsWith(".json"))[0];
 
-        const quiz = (await axios.get(JSONLink)).data;
+        let quiz;
 
-        const inputQuiz = {
-          quizNumber: 1,
-          category: categoryRecord[currentCategory],
-          theme: quiz["thème"].slice(0, quiz["thème"].indexOf("(") - 1),
-          subTheme: quiz["thème"].slice(
-            quiz["thème"].indexOf("(") + 1,
-            quiz["thème"].indexOf(")"),
-          ),
-          difficulty: quiz["difficulté"][0],
-          quizItems: {
-            beginner: quiz.quizz.fr["débutant"].map((quizItem) => ({
-              quizItemId: quizItem.id,
-              question: quizItem.question,
-              choices: quizItem.propositions,
-              answer: quizItem["réponse"],
-              anecdote: quizItem.anecdote,
-            })),
-            intermediate: quiz.quizz.fr["confirmé"].map((quizItem) => ({
-              quizItemId: quizItem.id - 10,
-              question: quizItem.question,
-              choices: quizItem.propositions,
-              answer: quizItem["réponse"],
-              anecdote: quizItem.anecdote,
-            })),
-            expert: quiz.quizz.fr["expert"].map((quizItem) => ({
-              quizItemId: quizItem.id - 20,
-              question: quizItem.question,
-              choices: quizItem.propositions,
-              answer: quizItem["réponse"],
-              anecdote: quizItem.anecdote,
-            })),
-          },
-        };
+        try {
+          quiz = (await axios.get(JSONLink)).data;
 
-        const newQuiz = new Quiz(inputQuiz);
-        await newQuiz.save();
+          const inputQuiz = {
+            quizNumber: 1,
+            category: categoryRecord[currentCategory],
+            theme: quiz["thème"].slice(0, quiz["thème"].indexOf("(") - 1),
+            subTheme: quiz["thème"].slice(
+              quiz["thème"].indexOf("(") + 1,
+              quiz["thème"].indexOf(")"),
+            ),
+            difficulty: quiz["difficulté"][0],
+            quizItems: {
+              beginner: quiz.quizz.fr["débutant"].map((quizItem) => ({
+                quizItemId: quizItem.id,
+                question: quizItem.question,
+                choices: quizItem.propositions,
+                answer: quizItem["réponse"],
+                anecdote: quizItem.anecdote,
+              })),
+              intermediate: quiz.quizz.fr["confirmé"].map((quizItem) => ({
+                quizItemId: quizItem.id - 10,
+                question: quizItem.question,
+                choices: quizItem.propositions,
+                answer: quizItem["réponse"],
+                anecdote: quizItem.anecdote,
+              })),
+              expert: quiz.quizz.fr["expert"].map((quizItem) => ({
+                quizItemId: quizItem.id - 20,
+                question: quizItem.question,
+                choices: quizItem.propositions,
+                answer: quizItem["réponse"],
+                anecdote: quizItem.anecdote,
+              })),
+            },
+          };
 
-        console.log(`Quiz "${newQuiz._id}" added to the database.`);
+          const newQuiz = new Quiz(inputQuiz);
+          await newQuiz.save();
+
+          console.log(`Quiz "${newQuiz._id}" added to the database.`);
+        } catch (err) {
+          console.error(err);
+        }
       }
     }
   } catch (error) {

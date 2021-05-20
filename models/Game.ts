@@ -1,6 +1,6 @@
 import { Schema, model, Document } from "mongoose";
 import { EGameStage } from "../constants/GameStage.constants";
-import { QuizItemId, QuizItemLevel } from "../graphql/resolvers/Quiz";
+import { QuizItemId, QuizItemLevel } from "../models/Quiz";
 import { Player } from "../models/Player";
 
 interface Game extends Document {
@@ -10,8 +10,15 @@ interface Game extends Document {
   stage: EGameStage;
   players: [PlayerData];
   currentQuizItem: CurrentQuizItem;
+  scubadoobidooQuizItemSignatures: [ScubadoobidooQuizItemSignatures];
   createdAt: string;
   updatedAd?: string;
+}
+
+interface ScubadoobidooQuizItemSignatures {
+  quizId: string;
+  level: QuizItemLevel;
+  quizItemId: QuizItemId;
 }
 
 export interface PlayerData {
@@ -85,7 +92,7 @@ const gameSchema = new Schema(
         enum: ["beginner", "intermediate", "expert"],
       },
       quizItemId: {
-        type: String,
+        type: Number,
       },
       currentPlayers: {
         type: [
@@ -103,6 +110,25 @@ const gameSchema = new Schema(
       playersCanBuzz: {
         type: Boolean,
       },
+    },
+    scubadoobidooQuizItemSignatures: {
+      _id: false,
+      type: [
+        {
+          quizId: {
+            type: Schema.Types.ObjectId,
+            ref: "Quiz",
+          },
+          level: {
+            type: String,
+            enum: ["beginner", "intermediate", "expert"],
+          },
+          quizItemId: {
+            type: Number,
+          },
+        },
+      ],
+      required: true,
     },
   },
   { timestamps: true },

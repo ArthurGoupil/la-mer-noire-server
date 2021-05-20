@@ -1,16 +1,8 @@
 import { ApolloError } from "apollo-server-express";
-import Quiz from "../../../models/Quiz";
+import Quiz, { QuizItem } from "../../../models/Quiz";
 
 interface Id {
   id: string;
-}
-
-interface QuizItem {
-  quizItemId: number;
-  question: string;
-  choices: [string];
-  answer: string;
-  anecdote?: string;
 }
 
 interface QuizInput {
@@ -28,22 +20,26 @@ interface QuizInput {
   };
 }
 
-interface QuizItemDataInput {
+interface QuizItemData {
   quizId: string;
   level: "beginner" | "intermediate" | "expert";
   quizItemId: number;
 }
 
-export type QuizItemId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-export type QuizItemLevel = "beginner" | "intermediate" | "expert";
+interface QuizItemDataInput {
+  quizItemSignature: QuizItemData;
+}
+
+interface QuizzesItemsDataInput {
+  quizItemsSignatures: QuizItemData[];
+}
 
 const resolvers = {
   Query: {
-    quizItemData: async (
-      root,
-      { quizId, level, quizItemId }: QuizItemDataInput,
-    ) => {
+    quizItemData: async (root, { quizItemSignature }: QuizItemDataInput) => {
       try {
+        const { quizId, level, quizItemId } = quizItemSignature;
+
         const quizData = await Quiz.findById(quizId).populate("category");
         const { category, theme, subTheme, quizItems } = quizData;
         const quiz = quizItems[level].find(
@@ -58,6 +54,39 @@ const resolvers = {
           level,
           quiz,
         };
+      } catch (error) {
+        throw new ApolloError(error.message);
+      }
+    },
+    quizzesItemsData: async (
+      root,
+      { quizItemsSignatures }: QuizzesItemsDataInput,
+    ) => {
+      try {
+        const quizzesRawData = await Quiz.find({
+          _id: {
+            $in: quizItemsSignatures.map(
+              (quizItemSignature) => quizItemSignature.quizId,
+            ),
+          },
+        });
+
+        return quizzesRawData.map((quizRawData, index) => {
+          const { quizId, level, quizItemId } = quizItemsSignatures[index];
+          const { category, theme, subTheme, quizItems } = quizRawData;
+          const quiz = quizItems[level].find(
+            (quiz) => quiz.quizItemId === quizItemId,
+          );
+
+          return {
+            quizItemSignature: `${quizId}-${level}-${quiz.quizItemId}`,
+            category,
+            theme,
+            subTheme,
+            level,
+            quiz,
+          };
+        });
       } catch (error) {
         throw new ApolloError(error.message);
       }

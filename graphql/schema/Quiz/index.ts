@@ -49,10 +49,16 @@ export const quizInputs = `
     difficulty: Int!
     quizItems: QuizItemsByLevelInput!
   }
+  input QuizItemSignatureInput {
+    quizId:ID!
+    level:String!
+    quizItemId:Int!
+  }
 `;
 
 export const quizQueries = `
-  quizItemData(quizId:ID!, level:String!, quizItemId:Int!): QuizItemData!
+  quizItemData(quizItemSignature:QuizItemSignatureInput!): QuizItemData!
+  quizzesItemsData(quizItemsSignatures:[QuizItemSignatureInput]): [QuizItemData!]
 `;
 
 export const quizMutations = `

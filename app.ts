@@ -22,6 +22,10 @@ const apollo = new ApolloServer({
 const app = express();
 apollo.applyMiddleware({ app });
 
+app.get("/wake-up", (req, res) => {
+  res.json({ message: "I'm awaken!" });
+});
+
 const ws = createServer(app);
 apollo.installSubscriptionHandlers(ws);
 

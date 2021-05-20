@@ -6,6 +6,7 @@ export const gameTypes = `
     stage: String!
     players: [GamePlayer]!
     currentQuizItem: CurrentQuizItem!
+    scubadoobidooQuizItemSignatures: [ScubadoobidooQuizItemSignatures]!
     createdAt: String!
   }
   type Stage {
@@ -29,6 +30,19 @@ export const gameTypes = `
     answer: String!
     answerType: String!
   }
+  type ScubadoobidooQuizItemSignatures {
+    quizId: ID
+    level: String
+    quizItemId: Int
+  }
+  type ScubadoobidooQuizItemData {
+    quizItemId: Int!
+    question: String!
+    choices: [String]!
+    answer: String!
+    anecdote: String
+    level: String!
+  }
 `;
 
 export const gameSubscriptions = `
@@ -40,6 +54,7 @@ export const gameSubscriptions = `
 
 export const gameQueries = `
   game(shortId:String!): Game!
+  scubadoobidooQuizItems(shortId:String!): [ScubadoobidooQuizItemData]!
 `;
 
 export const gameMutations = `
