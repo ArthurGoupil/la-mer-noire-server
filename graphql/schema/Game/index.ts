@@ -29,7 +29,9 @@ export const gameTypes = `
     quizItemSignature: String!
     answer: String!
     answerType: String!
+    quizAnswer: String
   }
+
   type ScubadoobidooQuizItemSignatures {
     quizId: ID
     level: String
@@ -62,7 +64,7 @@ export const gameMutations = `
   deleteGame(shortId:String!): String!
   addPlayerToGame(shortId:String!, name:String!): ID!
   updateGameStage(shortId:String!, stage:String!): String!
-  giveAnswer(shortId:String!, playerId:ID!, quizItemSignature:String!, answer:String!, answerType: String!): String!
+  giveAnswer(shortId:String!, playerId:ID!, quizItemSignature:String!, answer:String!, answerType: String!, quizAnswer: String): String!
   generateNewCurrentQuizItem(shortId:String!, level:String!): String!
   updatePlayersCanAnswer(shortId:String!, playersCanAnswer:Boolean!): String!
   updatePlayersCanBuzz(shortId:String!, playersCanBuzz:Boolean!): String!

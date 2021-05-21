@@ -69,7 +69,7 @@ const resolvers = {
               (quizItemSignature) => quizItemSignature.quizId,
             ),
           },
-        });
+        }).populate("category");
 
         return quizzesRawData.map((quizRawData, index) => {
           const { quizId, level, quizItemId } = quizItemsSignatures[index];

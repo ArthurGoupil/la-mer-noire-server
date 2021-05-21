@@ -22,6 +22,7 @@ export interface Stage {
 export interface Answer {
   answer: string;
   answerType: "duo" | "carre" | "cash";
+  quizAnswer: string;
 }
 
 export interface QuizItemSignature {

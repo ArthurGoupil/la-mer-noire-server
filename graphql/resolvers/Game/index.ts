@@ -200,6 +200,7 @@ const resolvers = {
         quizItemSignature,
         answer,
         answerType,
+        quizAnswer,
       }: ShortId & PlayerId & Answer & QuizItemSignature,
     ) => {
       try {
@@ -210,6 +211,7 @@ const resolvers = {
             quizItemSignature,
             answer,
             answerType,
+            quizAnswer,
           },
         });
 
